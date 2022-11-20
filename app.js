@@ -1,25 +1,28 @@
+const connectDb = require('./configs/connectDB');
 const express = require('express');
 const dotenv = require('dotenv');
 const morgan = require('morgan');
-
-dotenv.config({path:"./configs/config.env"});
-
-
+const colors = require('colors');
 const app = express();
-app.use(express.json())
 
+//route
+const usersRoute = require('./routes/user');
+const groupsRoute = require('./routes/group');
 
-const usersRoute = require('./routes/users');
+dotenv.config({ path: './configs/config.env' });
+connectDb();
 
-if(process.env.NODE_ENV === 'development'){
-    app.use(morgan('dev'));
+app.use(express.json());
+
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
 }
 
-app.use('/api/v1/users',usersRoute);
-
+//mount route
+app.use('/api/v1/user', usersRoute);
+app.use('/api/v1/group', groupsRoute);
 
 const PORT = process.env.PORT || 5000;
-
-app.listen(PORT,()=>{
-    console.log(`App running on port ${PORT}...`);
-})
+app.listen(PORT, () => {
+  console.log(`App running on port ${PORT}...`);
+});
