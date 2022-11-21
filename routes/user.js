@@ -3,10 +3,17 @@ const express = require('express');
 const router = express.Router();
 const { 
     getUsers,
-    createUser
+    signUp,
+    logIn
 } = require('../controllers/userController');
 
 router.route('/')
-    .get(getUsers)
-    .post(createUser);
+    .get(getUsers);
+
+router.route('/signup')
+    .post(signUp);
+
+router.route('/login')
+    .post(logIn);
+    
 module.exports = router;

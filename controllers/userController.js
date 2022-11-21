@@ -1,5 +1,9 @@
 const User = require('../models/user');
 
+const passport = require('passport');
+const passportConfig = require('../configs/passport');
+
+
 exports.getUsers = async (req, res, next) => {
   try{
     const users = await User.find();
@@ -9,18 +13,36 @@ exports.getUsers = async (req, res, next) => {
   }
 };
 
-exports.createUser = async(req,res,next) =>{
+exports.signUp = async(req,res,next) =>{
   try{
-    console.log(req.body);
-    const user = await User.create(req.body);
+  
+    var user = new User();
+    user.username = req.body.username;
+    user.email = req.body.email;
+    user.setPassword(req.body.password);
+    console.log(user);
+    const items = await User.create(user);
 
     res.status(201).json({
         success:true,
-        data: user
+        data: items.toAuthJSON()
     });
   }catch(err){
-    res.status(400).json({success:false});
+    res.status(400).json({success:err});
   }
+}
+
+
+exports.logIn = async(req, res, next) =>{
+  passport.authenticate('local', {session: false}, function(err, user, info){
+    if(err){ return next(err); }
+    if(user){
+      user.token = user.generateJWT();
+      return res.json({user: user.toAuthJSON()});
+    } else {
+      return res.status(422).json(info);
+    }
+  })(req, res, next);
 }
 
 
