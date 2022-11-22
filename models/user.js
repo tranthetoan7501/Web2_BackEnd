@@ -17,6 +17,7 @@ const User = new mongoose.Schema(
     },
     email:{
       type: String,
+      unique: true,
       match: [
         /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
         'Please add a valid email'
@@ -27,6 +28,12 @@ const User = new mongoose.Schema(
         courseName : String
     }],
     salt:{
+      type:String
+    },
+    imgUrl: {
+      type:String
+    },
+    nickName: {
       type:String
     }
   }
