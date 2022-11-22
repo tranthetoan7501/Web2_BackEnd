@@ -1,7 +1,7 @@
 const User = require('../models/user');
 
 const passport = require('passport');
-const passportConfig = require('../configs/passport');
+const passportConfig = require('../middlewares/passport');
 
 
 exports.getUsers = async (req, res, next) => {

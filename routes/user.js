@@ -6,9 +6,11 @@ const {
     signUp,
     logIn
 } = require('../controllers/userController');
+const {protect} = require('../middlewares/auth')
+
 
 router.route('/')
-    .get(getUsers);
+    .get(protect,getUsers);
 
 router.route('/signup')
     .post(signUp);
