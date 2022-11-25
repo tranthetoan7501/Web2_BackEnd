@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+
 const Group = new mongoose.Schema({
   groupName: {
     type: String,
@@ -7,16 +8,17 @@ const Group = new mongoose.Schema({
     maxlength: [100, 'Groupname can not be more than 100 characters'],
   },
   owner: {
-    id: String,
+    id: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
     name: String,
+    require: [true, 'Please add owner'],
   },
   coOwner: {
-    id: String,
+    id: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
     name: String,
   },
   member: [
     {
-      id: String,
+      id: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
       name: String,
     },
   ],

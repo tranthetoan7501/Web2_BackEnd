@@ -23,7 +23,7 @@ const User = new mongoose.Schema({
   groups: [
     {
       id: String,
-      courseName: String,
+      groupName: String,
     },
   ],
   salt: {
