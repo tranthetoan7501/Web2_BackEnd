@@ -1,13 +1,11 @@
-const connectDb = require('./configs/connectDB');
 const express = require('express');
 const dotenv = require('dotenv');
 const morgan = require('morgan');
 const colors = require('colors');
-const app = express();
+// db
+const connectDb = require('./configs/connectDB');
 
-//route
-const usersRoute = require('./routes/user');
-const groupsRoute = require('./routes/group');
+const app = express();
 
 dotenv.config({ path: './configs/config.env' });
 connectDb();
@@ -18,9 +16,8 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-//mount route
-app.use('/api/v1/user', usersRoute);
-app.use('/api/v1/group', groupsRoute);
+const route = require('./routes');
+route(app);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

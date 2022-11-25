@@ -4,7 +4,8 @@
   "description": "Web2_backendproject",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon app"
+    "start": "node app.js",
+    "dev": "nodemon app.js"
   },
   "repository": {
     "type": "git",
@@ -20,13 +21,6 @@
     "colors": "^1.4.0",
     "dotenv": "^16.0.3",
     "eslint": "^8.28.0",
-    "eslint-config-airbnb": "^19.0.4",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-import": "^2.26.0",
-    "eslint-plugin-jsx-a11y": "^6.6.1",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-prettier": "^4.2.1",
-    "eslint-plugin-react": "^7.31.11",
     "express": "^4.18.2",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.7.2",
