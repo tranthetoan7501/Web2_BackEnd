@@ -2,7 +2,7 @@ const express = require('express');
 
 const router = express.Router();
 const { getUsers, signUp, logIn } = require('../controllers/userController');
-const { protect } = require('../middlewares/auth');
+const { protect } = require('../middleware/auth');
 
 router.route('/').get(protect, getUsers);
 
