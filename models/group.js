@@ -8,9 +8,11 @@ const Group = new mongoose.Schema({
     maxlength: [100, 'Groupname can not be more than 100 characters'],
   },
   owner: {
-    id: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
-    name: String,
-    require: [true, 'Please add owner'],
+    type: {
+      id: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
+      name: String,
+    },
+    required: [true, 'Please add owner'],
   },
   coOwner: {
     id: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
