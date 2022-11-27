@@ -1,6 +1,5 @@
 const User = require('../models/user');
 const asyncHandler = require('../middleware/async');
-//const passport = require('passport');
 const ErrorResponse = require('../utils/errorResponse');
 
 exports.getUsers = asyncHandler(async (req, res, next) => {
@@ -13,74 +12,40 @@ exports.signUp = asyncHandler(async (req, res, next) => {
   user.username = req.body.username;
   user.email = req.body.email;
   user.password = req.body.password;
+  user.TokenCode = Math.random().toString();
+  user.UsingToken = user.getSignedJwtToken();
 
   const items = await User.create(user);
-  // console.log(user);
-  // res.status(201).json({
-  //   success: true,
-  //   data: items.toAuthJSON(),
-  // });
 
   sendTokenResponse(items, 200, res);
 });
 
 exports.logIn = async (req, res, next) => {
-  // passport.authenticate(
-  //   'local',
-  //   { session: false },
-  //   function (err, user, info) {
-  //     if (err) {
-  //       return next(err);
-  //     }
-  //     if (user) {
-  //       user.token = user.generateJWT();
-  //       return res.json({ user: user.toAuthJSON() });
-  //     } else {
-  //       return res.status(422).json(info);
-  //     }
-  //   }
-  // )(req, res, next);
-
-  const { email, password } = req.body;
-
-  // Validate emil & password
-  if (!email || !password) {
-    return next(new ErrorResponse('Please provide an email and password', 400));
+  if (req.err) {
+    return next(req.err);
   }
-
-  // Check for user
-  const user = await User.findOne({ email }).select('+password');
-
-  const userUpdate = await User.findByIdAndUpdate(
-    user._id,
-    { Islogin: true },
-    {
-      new: true,
-      runValidators: true,
-    }
-  );
-  console.log(userUpdate);
-  if (!user) {
-    return next(new ErrorResponse('Invalid credentials', 401));
+  if (req.user) {
+    req.user.TokenCode = Math.random().toString();
+    req.user.token = req.user.getSignedJwtToken();
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { TokenCode: req.user.TokenCode },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+    sendTokenResponse(req.user, 200, res);
+  } else {
+    // Sửa response này
+    return res.status(422).json(req.info);
   }
-
-  // Check if password matches
-  const isMatch = await user.matchPassword(password);
-
-  if (!isMatch) {
-    return next(new ErrorResponse('Invalid credentials', 401));
-  }
-  // res.status(201).json({
-  //   success: true,
-  //   data: user.toAuthJSON(),
-  // });
-  sendTokenResponse(user, 200, res);
 };
 
 exports.logOut = asyncHandler(async (req, res, next) => {
   const user = await User.findByIdAndUpdate(
     req.user.id,
-    { Islogin: false },
+    { TokenCode: '' },
     {
       new: true,
       runValidators: true,

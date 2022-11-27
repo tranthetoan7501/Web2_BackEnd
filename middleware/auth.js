@@ -3,6 +3,8 @@ const asyncHandler = require('./async');
 const ErrorResponse = require('../utils/errorResponse');
 const User = require('../models/user');
 
+// authen ko dùng thư viên passport jwt js
+
 // Protect routes
 exports.protect = asyncHandler(async (req, res, next) => {
   let token;

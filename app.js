@@ -1,12 +1,36 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const morgan = require('morgan');
+const passport = require('passport');
+const passportLocal = require('./middleware/passport');
 const colors = require('colors');
+const cors = require('cors');
+const cookieSession = require('cookie-session');
+
 const errorHandler = require('./middleware/error');
 // db
 const connectDb = require('./configs/connectDB');
 
 const app = express();
+
+app.use(
+  cookieSession({
+    name: 'session',
+    keys: ['cyberwolve'],
+    maxAge: 24 * 60 * 60 * 100,
+  })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use(
+  cors({
+    origin: 'http://localhost:3000',
+    methods: 'GET,POST,PUT,DELETE',
+    credentials: true,
+  })
+);
 
 dotenv.config({ path: './configs/config.env' });
 connectDb();
