@@ -1,13 +1,36 @@
-const connectDb = require('./configs/connectDB');
 const express = require('express');
 const dotenv = require('dotenv');
 const morgan = require('morgan');
+const passport = require('passport');
+const passportLocal = require('./middleware/passport');
 const colors = require('colors');
+const cors = require('cors');
+const cookieSession = require('cookie-session');
+
+const errorHandler = require('./middleware/error');
+// db
+const connectDb = require('./configs/connectDB');
+
 const app = express();
 
-//route
-const usersRoute = require('./routes/user');
-const groupsRoute = require('./routes/group');
+app.use(
+  cookieSession({
+    name: 'session',
+    keys: ['cyberwolve'],
+    maxAge: 24 * 60 * 60 * 100,
+  })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use(
+  cors({
+    origin: 'http://localhost:3000',
+    methods: 'GET,POST,PUT,DELETE',
+    credentials: true,
+  })
+);
 
 dotenv.config({ path: './configs/config.env' });
 connectDb();
@@ -17,10 +40,12 @@ app.use(express.json());
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
+const user = require('./routes/user');
+app.use('/api/user', user);
+// const route = require('./routes');
 
-//mount route
-app.use('/api/v1/user', usersRoute);
-app.use('/api/v1/group', groupsRoute);
+// route(app);
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

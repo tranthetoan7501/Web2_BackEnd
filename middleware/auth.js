@@ -3,11 +3,12 @@ const asyncHandler = require('./async');
 const ErrorResponse = require('../utils/errorResponse');
 const User = require('../models/user');
 
+// authen ko dùng thư viên passport jwt js
+
 // Protect routes
 exports.protect = asyncHandler(async (req, res, next) => {
   let token;
 
-  
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith('Bearer')
@@ -15,10 +16,9 @@ exports.protect = asyncHandler(async (req, res, next) => {
     // Set token from Bearer token in header
     token = req.headers.authorization.split(' ')[1];
     // Set token from cookie
+  } else if (req.cookies.token) {
+    token = req.cookies.token;
   }
-  // else if (req.cookies.token) {
-  //   token = req.cookies.token;
-  // }
 
   // Make sure token exists
   if (!token) {
@@ -27,10 +27,12 @@ exports.protect = asyncHandler(async (req, res, next) => {
 
   try {
     // Verify token
-    console.log(process.env.JWT_SECRET);
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
+    console.log(decoded.id);
     req.user = await User.findById(decoded.id);
+    if (req.user.Islogin == false) {
+      return next(new ErrorResponse('Yout must to login', 401));
+    }
 
     next();
   } catch (err) {
