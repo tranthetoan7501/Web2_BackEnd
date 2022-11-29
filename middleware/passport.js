@@ -22,7 +22,6 @@ passport.use(
             errors: { 'email or password': 'is invalid' },
           });
         }
-
         return done(null, user);
       } catch (err) {
         done(null);
@@ -35,16 +34,16 @@ passport.use(
   new JwtStrategy(
     {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken('Authorization'),
-      secretOrKey: 'secrect key',
+      secretOrKey: 'secret key',
     },
     async function (jwt_payload, done) {
       try {
         console.log(jwt_payload);
 
         const user = await User.findOne({ email: jwt_payload.email });
-        console.log(user.TokenCode);
+        console.log(user.tokenCode);
 
-        if (user && user.TokenCode == jwt_payload.code) {
+        if (user && user.tokenCode == jwt_payload.code) {
           return done(null, user);
         } else {
           return done(null, false);

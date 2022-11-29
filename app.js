@@ -40,11 +40,10 @@ app.use(express.json());
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
-const user = require('./routes/user');
-app.use('/api/user', user);
-// const route = require('./routes');
 
-// route(app);
+const route = require('./routes');
+
+route(app);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;

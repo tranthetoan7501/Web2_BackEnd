@@ -7,8 +7,10 @@ const {
   signUp,
   logIn,
   logOut,
+  verify,
 } = require('../controllers/userController');
 const { protect } = require('../middleware/auth');
+router.route('/confirm/:token').get(verify);
 
 router
   .route('/users')

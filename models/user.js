@@ -35,8 +35,12 @@ const User = new mongoose.Schema({
     enum: ['user', 'publisher'],
     default: 'user',
   },
-  TokenCode: {
+  tokenCode: {
     type: String,
+  },
+  verified: {
+    type: Boolean,
+    default: false,
   },
   resetPasswordToken: String,
   resetPasswordExpire: Date,
@@ -46,19 +50,11 @@ const User = new mongoose.Schema({
   },
 });
 
-// User.methods.setPassword = function (password) {
-//   this.salt = crypto.randomBytes(16).toString('hex');
-//   this.password = crypto
-//     .pbkdf2Sync(password, this.salt, 10000, 512, 'sha512')
-//     .toString('hex');
-// };
-
 // Encrypt password using bcrypt
 User.pre('save', async function (next) {
   if (!this.isModified('password')) {
     next();
   }
-
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });
@@ -72,9 +68,21 @@ User.methods.getSignedJwtToken = function () {
     {
       id: this._id,
       email: this.email,
-      code: this.TokenCode,
+      code: this.tokenCode,
     },
     process.env.JWT_SECRET,
+    {
+      expiresIn: process.env.JWT_EXPIRE,
+    }
+  );
+};
+
+User.methods.getVerifyMailJwt = function () {
+  return jwt.sign(
+    {
+      email: this.email,
+    },
+    process.env.VERIFY_MAIL_JWT_SECRET,
     {
       expiresIn: process.env.JWT_EXPIRE,
     }
@@ -85,28 +93,6 @@ User.methods.getSignedJwtToken = function () {
 User.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
-
-// User.methods.validPassword = function (password) {
-//   var hash = crypto
-//     .pbkdf2Sync(password, this.salt, 10000, 512, 'sha512')
-//     .toString('hex');
-//   return this.hashPassword === hash;
-// };
-
-// User.methods.generateJWT = function () {
-//   var today = new Date();
-//   var exp = new Date(today);
-//   exp.setDate(today.getDate() + 60);
-
-//   return jwt.sign(
-//     {
-//       id: this._id,
-//       username: this.username,
-//       exp: parseInt(exp.getTime() / 1000),
-//     },
-//     process.env.JWT_SECRET
-//   );
-// };
 
 User.methods.toAuthJSON = function () {
   return {
