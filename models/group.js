@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const jwt = require('jsonwebtoken');
 
 const Group = new mongoose.Schema({
   groupName: {
@@ -22,6 +23,7 @@ const Group = new mongoose.Schema({
     {
       id: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
       name: String,
+      email: String,
     },
   ],
   kickOut: [
@@ -30,5 +32,22 @@ const Group = new mongoose.Schema({
       name: String,
     },
   ],
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
+
+Group.methods.getGroupJwt = function () {
+  return jwt.sign(
+    {
+      id: this._id,
+    },
+    process.env.GROUP_JWT_SECRET,
+    {
+      expiresIn: process.env.JWT_EXPIRE,
+    }
+  );
+};
+
 module.exports = mongoose.model('Group', Group);

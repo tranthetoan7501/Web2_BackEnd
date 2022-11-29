@@ -38,8 +38,6 @@ passport.use(
     },
     async function (jwt_payload, done) {
       try {
-        console.log(jwt_payload);
-
         const user = await User.findOne({ email: jwt_payload.email });
         console.log(user.tokenCode);
 
