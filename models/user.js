@@ -64,9 +64,9 @@ User.pre('save', async function (next) {
 
 // Sign JWT and return
 User.methods.getSignedJwtToken = function () {
-  var today = new Date();
-  var exp = new Date(today);
-  exp.setDate(today.getDate() + 60);
+  // var today = new Date();
+  // var exp = new Date(today);
+  // exp.setDate(today.getDate() + 60);
   return jwt.sign(
     {
       id: this._id,

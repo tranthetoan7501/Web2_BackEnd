@@ -37,7 +37,6 @@ exports.signUp = asyncHandler(async (req, res, next) => {
   }
 });
 exports.verify = asyncHandler(async (req, res, next) => {
-  console.log(req.params.token);
   const decoded = jwt.verify(
     req.params.token,
     process.env.VERIFY_MAIL_JWT_SECRET
@@ -52,4 +51,47 @@ exports.verify = asyncHandler(async (req, res, next) => {
     return res.status(200).json({ success: true, data: user.toAuthJSON() });
   }
   return next(new ErrorResponse('Can not verify your account', 500));
+});
+
+exports.logIn = async (req, res, next) => {
+  if (req.err) {
+    return next(req.err);
+  }
+  if (req.user) {
+    req.user.tokenCode = Math.random().toString();
+    req.user.token = req.user.getSignedJwtToken();
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { tokenCode: req.user.tokenCode },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+    sendTokenResponse(req.user, 200, res);
+  } else {
+    // Sửa response này
+    return res.status(422).json(req.info);
+  }
+};
+
+exports.logOut = asyncHandler(async (req, res, next) => {
+  const user = await User.findByIdAndUpdate(
+    req.user.id,
+    { tokenCode: '' },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  res.cookie('token', 'none', {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true,
+  });
+
+  res.status(200).json({
+    success: true,
+    data: {},
+  });
 });
