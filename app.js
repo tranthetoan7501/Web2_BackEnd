@@ -47,6 +47,7 @@ route(app);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
+console.log("USing port: ", PORT)
 app.listen(PORT, () => {
   console.log(`App running on port ${PORT}...`);
 });
