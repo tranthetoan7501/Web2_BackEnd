@@ -44,14 +44,21 @@ router.get('/login/failed', (req, res) => {
   });
 });
 
-router.get('/google', passport.authenticate('google', ['profile', 'email']));
+router.get('/auth/google', passport.authenticate('google', {scope: ['profile', 'email']}), 
+function(req, res) {
+  console.log("\n\nres: ", JSON.stringify(res))
+});
 
-router.get(
-  '/google/callback',
-  passport.authenticate('google', {
-    successRedirect: process.env.GOOGLE_CLIENT_URL,
+router.get('/auth/google/callback', passport.authenticate('google', {
+    // successRedirect: process.env.GOOGLE_CLIENT_URL,
     failureRedirect: '/login/failed',
-  })
+  }), (req, res) => {
+    // const token = generateJwtToken(req.user);
+    // res.cookie('jwt', token);
+    // res.redirect('/');
+    console.log("\n\nres callback: ", res)
+    console.log("\n\nreq callback: ", req)
+  }
 );
 
 router.get('/googlelogout', (req, res) => {
