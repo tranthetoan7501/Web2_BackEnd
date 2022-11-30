@@ -72,6 +72,7 @@ passport.use(
           user.username = profile.name.familyName + ' ' + profile.name.givenName
           user.googleId = profile.id
           user.email = profile.emails[0].value
+          user.verified = true
           const newUser = await User.create(user)
           done(null, newUser)
         }
