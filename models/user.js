@@ -21,8 +21,8 @@ const User = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, 'Please add a password'],
-    minlength: 6,
+    // required: [true, 'Please add a password'],
+    // minlength: 6,
   },
   groups: [
     {
@@ -48,6 +48,9 @@ const User = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  googleId: {
+    type: String,
+  }
 });
 
 // Encrypt password using bcrypt

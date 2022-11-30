@@ -29,6 +29,29 @@ exports.logIn = async (req, res, next) => {
   }
 };
 
+exports.logInWithGoogle = async (req, res, next) => {
+  console.log("inside login with google")
+  if (req.err) {
+    return next(req.err);
+  }
+  if (req.user) {
+    req.user.tokenCode = Math.random().toString();
+    req.user.token = req.user.getSignedJwtToken();
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { tokenCode: req.user.tokenCode },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+    sendTokenResponse(req.user, 200, res);
+  } else {
+    // Sửa response này
+    return res.status(422).json(req.info);
+  }
+};
+
 exports.logOut = asyncHandler(async (req, res, next) => {
   const user = await User.findByIdAndUpdate(
     req.user.id,

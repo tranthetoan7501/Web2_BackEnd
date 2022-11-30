@@ -7,8 +7,8 @@ const sendEmail = async (options) => {
     // port: process.env.SMTP_PORT,
     secure: false,
     auth: {
-      user: 'camaphoot@gmail.com',
-      pass: 'sdrrdlgabgfqpqyq',
+      user: process.env.MAIL_USER,
+      pass: process.env.MAIL_PASS,
     },
   });
 
