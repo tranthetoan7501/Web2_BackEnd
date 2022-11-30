@@ -28,6 +28,7 @@ exports.generateLinkJoinGroup = asyncHandler(async (req, res, next) => {
   if (group != null && req.user.id == group.owner.id) {
     var linkInvite = `${
       process.env.BASE_URL
+      //req.baseUrl
     }/api/group/join/${group.getGroupJwt()}`;
     res.status(200).json({ success: true, data: linkInvite });
   } else {
@@ -38,14 +39,16 @@ exports.generateLinkJoinGroup = asyncHandler(async (req, res, next) => {
 exports.joinGroup = asyncHandler(async (req, res, next) => {
   const decoded = jwt.verify(req.params.token, process.env.GROUP_JWT_SECRET);
   var group = await Group.findById(decoded.id);
+  if (!group) {
+    return next(new ErrorResponse('Can not find this group with id', 500));
+  }
   var findMember = group.member.find((obj) => obj.id == req.user.id);
 
-  // if (group.owner.id.toString() == req.user._id) {
-  //   res.status(200).json({
-  //     success: true,
-  //     data: 'Can not join. You is owner of this group',
-  //   });
-  // }
+  if (group.owner.id.toString() == req.user._id) {
+    return next(
+      new ErrorResponse('Can not join. You is owner of this group', 500)
+    );
+  }
   if (!findMember) {
     var memberList = group.member;
     memberList.push({
@@ -65,5 +68,7 @@ exports.joinGroup = asyncHandler(async (req, res, next) => {
     );
     res.status(200).json({ success: true, data: item });
   }
-  res.status(200).json({ success: true, data: 'You joined' });
+  return next(new ErrorResponse('You was a member of this group', 500));
 });
+
+exports.inviteByEmail = asyncHandler(async (req, res, next) => {});

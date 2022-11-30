@@ -39,7 +39,6 @@ passport.use(
     async function (jwt_payload, done) {
       try {
         const user = await User.findOne({ email: jwt_payload.email });
-        console.log(user.tokenCode);
 
         if (user && user.tokenCode == jwt_payload.code) {
           return done(null, user);
