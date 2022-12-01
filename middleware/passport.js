@@ -59,22 +59,20 @@ passport.use(
         '1043053836697-q5sku2jln8bohhqm2oqu25auha4als3u.apps.googleusercontent.com', //GOOGLE_CLIENT_ID,
       clientSecret: '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',
       callbackURL: '/api/user/auth/google/callback',
-      scope: ['profile'],
+      scope: ['profile', 'email'],
     },
     async (accessToken, refreshToken, profile, done) => {
-      // Check if google profile exist.
+      //Check if google profile exist.
       if (profile.id) {
-        // const existingUser = await userService.findUserByGoogleID(profile.id);
         const gmail = profile.emails[0].value;
-        var existingUser 
-        if (gmail !== "" || gmail !== null || gmail !== undefined) {
-          existingUser = await userService.findUserByGoogleID(gmail);
+        var existingUser;
+        if (gmail) {
+          existingUser = await userService.findUserByEmail(gmail);
         } else {
           existingUser = await userService.findUserByGoogleID(profile.id);
         }
-       
         if (existingUser) {
-          done(null, existingUser);
+          done(null, { success: true, data: existingUser.toAuthJSON() });
         } else {
           var user = new User();
           user.username =
@@ -83,13 +81,11 @@ passport.use(
           user.email = profile.emails[0].value;
           user.verified = true;
           try {
-            const newUser = await User.create(user);
-            done(null, newUser);
+            const newUser = await User.create(user.toAuthJSON());
+            done(null, { success: true, data: newUser });
           } catch (err) {
-            console.log(err)
-            done(null, user)
+            done(null, { success: true, data: user.toAuthJSON() });
           }
-          
         }
       }
     }

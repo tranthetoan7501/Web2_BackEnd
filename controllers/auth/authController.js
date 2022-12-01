@@ -65,6 +65,7 @@ exports.logIn = async (req, res, next) => {
         runValidators: true,
       }
     );
+
     AuthService.sendTokenResponse(req.user, 200, res);
   } else {
     // Sửa response này
