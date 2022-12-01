@@ -10,12 +10,14 @@ const {
   generateLinkEmail,
   joinByMailLink,
   assignCoOwner,
+  getGroupById,
 } = require('../controllers/group/groupController');
 
 router
   .route('/')
   .get(passport.authenticate('jwt', { session: false }), getGroups)
   .post(passport.authenticate('jwt', { session: false }), createGroup);
+
 router
   .route('/invitelink')
   .post(
@@ -33,6 +35,10 @@ router
 router
   .route('/assigncoowner')
   .post(passport.authenticate('jwt', { session: false }), assignCoOwner);
+
+router
+  .route('/:id')
+  .get(passport.authenticate('jwt', { session: false }), getGroupById);
 
 router.route('/mailjoin/:token').get(joinByMailLink);
 module.exports = router;

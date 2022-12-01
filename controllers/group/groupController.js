@@ -5,6 +5,14 @@ const jwt = require('jsonwebtoken');
 const User = require('../../models/user');
 const sendEmail = require('../../utils/sendEmail');
 
+exports.getGroupById = asyncHandler(async (req, res, next) => {
+  const group = await Group.findById(req.params.id);
+  if (!group) {
+    return next(new ErrorResponse('Can not find group with id', 500));
+  }
+  res.status(200).json({ success: true, data: group });
+});
+
 exports.getGroups = asyncHandler(async (req, res, next) => {
   const groups = await Group.find();
   res.status(200).json({ success: true, limit: groups.length, data: groups });
