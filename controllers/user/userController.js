@@ -11,3 +11,7 @@ exports.getUserById = asyncHandler(async (req, res, next) => {
   const user = await User.findById(req.params.id).select('-password');
   res.status(200).json({ success: true, data: user });
 });
+
+exports.getProfile = asyncHandler(async (req, res, next) => {
+  res.status(200).json({ success: true, data: req.user });
+});

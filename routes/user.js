@@ -2,7 +2,11 @@ const express = require('express');
 const passport = require('passport');
 
 const router = express.Router();
-const { getUsers, getUserById } = require('../controllers/user/userController');
+const {
+  getUsers,
+  getUserById,
+  getProfile,
+} = require('../controllers/user/userController');
 const { logIn } = require('../controllers/auth/authController');
 
 router
@@ -63,8 +67,12 @@ router.get(
   passport.authenticate('google', { failureRedirect: '/login/failed' }),
   logIn
 );
-
-router.route('/:id').get(getUserById);
+router
+  .route('/profile')
+  .get(passport.authenticate('jwt', { session: false }), getProfile);
+router
+  .route('/:id')
+  .get(passport.authenticate('jwt', { session: false }), getUserById);
 
 // router.get('/googlelogout', (req, res) => {
 //   req.logout();

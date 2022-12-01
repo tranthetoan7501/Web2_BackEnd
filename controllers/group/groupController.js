@@ -24,7 +24,7 @@ exports.createGroup = asyncHandler(async (req, res, next) => {
   group.owner = { id: req.user.id, name: req.user.username };
 
   const groupCreate = await Group.create(group);
-  var ownGroupList = req.user.ownGroup;
+  var ownGroupList = req.user.ownGroups;
   ownGroupList.push({
     id: groupCreate.id,
     groupName: groupCreate.groupName,
@@ -33,7 +33,7 @@ exports.createGroup = asyncHandler(async (req, res, next) => {
   var user = await User.findByIdAndUpdate(
     req.user.id,
     {
-      ownGroup: ownGroupList,
+      ownGroups: ownGroupList,
     },
     {
       new: true,
