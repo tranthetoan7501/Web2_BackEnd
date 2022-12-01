@@ -64,7 +64,15 @@ passport.use(
     async (accessToken, refreshToken, profile, done) => {
       // Check if google profile exist.
       if (profile.id) {
-        const existingUser = await userService.findUserByGoogleID(profile.id);
+        // const existingUser = await userService.findUserByGoogleID(profile.id);
+        const gmail = profile.emails[0].value;
+        var existingUser 
+        if (gmail !== "" || gmail !== null || gmail !== undefined) {
+          existingUser = await userService.findUserByGoogleID(gmail);
+        } else {
+          existingUser = await userService.findUserByGoogleID(profile.id);
+        }
+       
         if (existingUser) {
           done(null, existingUser);
         } else {
@@ -74,8 +82,14 @@ passport.use(
           user.googleId = profile.id;
           user.email = profile.emails[0].value;
           user.verified = true;
-          const newUser = await User.create(user);
-          done(null, newUser);
+          try {
+            const newUser = await User.create(user);
+            done(null, newUser);
+          } catch (err) {
+            console.log(err)
+            done(null, user)
+          }
+          
         }
       }
     }
