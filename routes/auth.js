@@ -19,6 +19,6 @@ router
 
 router
   .route('/logout')
-  .get(passport.authenticate('jwt', { session: false }), logOut);
+  .post(passport.authenticate('jwt', { session: false }), logOut);
 
 module.exports = router;
