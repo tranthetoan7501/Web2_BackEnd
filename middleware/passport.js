@@ -1,10 +1,9 @@
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const User = require('../models/user');
-const userService = require('../controllers/user/userService')
+const userService = require('../controllers/user/userService');
 const JwtStrategy = require('passport-jwt').Strategy;
 const ExtractJwt = require('passport-jwt').ExtractJwt;
-
 var GoogleStrategy = require('passport-google-oauth20').Strategy;
 
 passport.use(
@@ -34,7 +33,7 @@ passport.use(
   new JwtStrategy(
     {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken('Authorization'),
-      secretOrKey: "secret key",
+      secretOrKey: 'secret key',
     },
     async function (jwt_payload, done) {
       try {
@@ -59,21 +58,24 @@ passport.use(
         '1043053836697-q5sku2jln8bohhqm2oqu25auha4als3u.apps.googleusercontent.com', //GOOGLE_CLIENT_ID,
       clientSecret: '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',
       callbackURL: '/api/user/auth/google/callback',
-      scope: [ 'profile' ],
-    }, async (accessToken, refreshToken, profile, done) => {
+      scope: ['profile'],
+    },
+    async (accessToken, refreshToken, profile, done) => {
       // Check if google profile exist.
       if (profile.id) {
-        const existingUser = await userService.findUserByGoogleID(profile.id)
+        const existingUser = await userService.findUserByGoogleID(profile.id);
         if (existingUser) {
-          done(null, existingUser)
+          done(null, existingUser);
         } else {
           var user = new User();
-          console.log("profile: ", profile)
-          user.username = profile.name.familyName + ' ' + profile.name.givenName
-          user.googleId = profile.id
-          user.email = profile.emails[0].value
-          const newUser = await User.create(user)
-          done(null, newUser)
+          console.log('profile: ', profile);
+          user.username =
+            profile.name.familyName + ' ' + profile.name.givenName;
+          user.googleId = profile.id;
+          user.email = profile.emails[0].value;
+          user.verified = true;
+          const newUser = await User.create(user);
+          done(null, newUser);
         }
       }
     }

@@ -49,5 +49,17 @@ Group.methods.getGroupJwt = function () {
     }
   );
 };
+Group.methods.getJoinByLinkEmailJwt = function (userId) {
+  return jwt.sign(
+    {
+      id: this._id,
+      userid: userId,
+    },
+    process.env.GROUP_JWT_SECRET,
+    {
+      expiresIn: process.env.JWT_EXPIRE,
+    }
+  );
+};
 
 module.exports = mongoose.model('Group', Group);

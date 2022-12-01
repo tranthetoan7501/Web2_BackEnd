@@ -2,20 +2,12 @@ const express = require('express');
 const passport = require('passport');
 
 const router = express.Router();
-const { getUsers, logIn, logOut } = require('../controllers/userController');
-const { protect } = require('../middleware/auth');
+const { getUsers } = require('../controllers/user/userController');
+const { logIn } = require('../controllers/auth/authController');
 
 router
   .route('/users')
   .get(passport.authenticate('jwt', { session: false }), getUsers);
-
-router
-  .route('/login')
-  .post(passport.authenticate('local', { session: false }), logIn);
-
-router
-  .route('/logout')
-  .get(passport.authenticate('jwt', { session: false }), logOut);
 
 // Google auth
 router.get('/login/success', (req, res) => {
@@ -37,14 +29,16 @@ router.get('/login/failed', (req, res) => {
   });
 });
 
-router.get('/auth/google', passport.authenticate('google', {scope: ['profile', 'email']})
-// function(req, res) {
-//   console.log("\n\nres: ", JSON.stringify(res))
-//   res.status(200).json({
-//     error: false,
-//     message: 'Successfully Loged In google',
-//     user: req.user,
-//   });
+router.get(
+  '/auth/google',
+  passport.authenticate('google', { scope: ['profile', 'email'] })
+  // function(req, res) {
+  //   console.log("\n\nres: ", JSON.stringify(res))
+  //   res.status(200).json({
+  //     error: false,
+  //     message: 'Successfully Loged In google',
+  //     user: req.user,
+  //   });
 );
 
 // router.get('/auth/google/callback', passport.authenticate('google', {
@@ -64,7 +58,11 @@ router.get('/auth/google', passport.authenticate('google', {scope: ['profile', '
 //   }
 // );
 
-router.get('/auth/google/callback', passport.authenticate('google', {failureRedirect: '/login/failed',}), logIn);
+router.get(
+  '/auth/google/callback',
+  passport.authenticate('google', { failureRedirect: '/login/failed' }),
+  logIn
+);
 
 // router.get('/googlelogout', (req, res) => {
 //   req.logout();
