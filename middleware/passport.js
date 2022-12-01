@@ -14,13 +14,14 @@ passport.use(
     },
     async function (email, password, done) {
       try {
-        const user = await User.findOne({ email: email });
+        var user = await User.findOne({ email: email }).select('+password');
         const isMatch = await user.matchPassword(password);
         if (!user || !isMatch) {
           return done(null, false, {
             errors: { 'email or password': 'is invalid' },
           });
         }
+        user = await User.findOne({ email: email });
         return done(null, user);
       } catch (err) {
         done(null);
@@ -68,7 +69,6 @@ passport.use(
           done(null, existingUser);
         } else {
           var user = new User();
-          console.log('profile: ', profile);
           user.username =
             profile.name.familyName + ' ' + profile.name.givenName;
           user.googleId = profile.id;

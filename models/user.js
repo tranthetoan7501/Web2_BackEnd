@@ -21,9 +21,16 @@ const User = new mongoose.Schema({
   },
   password: {
     type: String,
+    select: false,
     // required: [true, 'Please add a password'],
     // minlength: 6,
   },
+  ownGroup: [
+    {
+      id: String,
+      groupName: String,
+    },
+  ],
   groups: [
     {
       id: String,
@@ -50,7 +57,7 @@ const User = new mongoose.Schema({
   },
   googleId: {
     type: String,
-  }
+  },
 });
 
 // Encrypt password using bcrypt
@@ -98,9 +105,9 @@ User.methods.matchPassword = async function (enteredPassword) {
 };
 
 User.methods.toAuthJSON = function () {
+  var p = Object.assign({}, this);
   return {
-    username: this.username,
-    email: this.email,
+    user: this,
     token: this.getSignedJwtToken(),
   };
 };

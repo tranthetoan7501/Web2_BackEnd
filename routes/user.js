@@ -2,7 +2,7 @@ const express = require('express');
 const passport = require('passport');
 
 const router = express.Router();
-const { getUsers } = require('../controllers/user/userController');
+const { getUsers, getUserById } = require('../controllers/user/userController');
 const { logIn } = require('../controllers/auth/authController');
 
 router
@@ -63,6 +63,8 @@ router.get(
   passport.authenticate('google', { failureRedirect: '/login/failed' }),
   logIn
 );
+
+router.route('/:id').get(getUserById);
 
 // router.get('/googlelogout', (req, res) => {
 //   req.logout();
