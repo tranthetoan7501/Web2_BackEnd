@@ -13,6 +13,12 @@ const { logIn } = require('../controllers/auth/authController');
 router
   .route('/users')
   .get(passport.authenticate('jwt', { session: false }), getUsers);
+router
+  .route('/profile')
+  .get(passport.authenticate('jwt', { session: false }), getProfile);
+router
+  .route('/:id')
+  .get(passport.authenticate('jwt', { session: false }), getUserById);
 
 // Google auth
 router.get('/login/success', async (req, res) => {
@@ -50,51 +56,5 @@ router.get('/auth/logout', (req, res) => {
   req.logout();
   res.redirect('http://localhost:3000');
 });
-
-// router.get(
-//   '/auth/google',
-//   passport.authenticate('google', { scope: ['profile', 'email'] })
-//   // function(req, res) {
-//   //   console.log("\n\nres: ", JSON.stringify(res))
-//   //   res.status(200).json({
-//   //     error: false,
-//   //     message: 'Successfully Loged In google',
-//   //     user: req.user,
-//   //   });
-// );
-
-// // router.get('/auth/google/callback', passport.authenticate('google', {
-// //     // successRedirect: process.env.GOOGLE_CLIENT_URL,
-// //     failureRedirect: '/login/failed',
-// //   }), (req, res) => {
-// //     // const token = generateJwtToken(req.user);
-// //     // res.cookie('jwt', token);
-// //     // res.redirect('/');
-// //     console.log("\n\nres callback: ", res)
-// //     console.log("\n\nreq callback: ", req)
-// //     res.status(200).json({
-// //       error: false,
-// //       message: 'Successfully Loged In Callback',
-// //       user: req.user,
-// //     });
-// //   }
-// // );
-
-// router.get(
-//   '/auth/google/callback',
-//   passport.authenticate('google', { failureRedirect: '/login/failed' }),
-//   logIn
-// );
-router
-  .route('/profile')
-  .get(passport.authenticate('jwt', { session: false }), getProfile);
-router
-  .route('/:id')
-  .get(passport.authenticate('jwt', { session: false }), getUserById);
-
-// router.get('/googlelogout', (req, res) => {
-//   req.logout();
-//   res.redirect(process.env.GOOGLE_CLIENT_URL);
-// });
 
 module.exports = router;
