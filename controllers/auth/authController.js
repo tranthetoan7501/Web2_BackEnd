@@ -16,15 +16,15 @@ exports.signUp = asyncHandler(async (req, res, next) => {
     process.env.BASE_URL
   }/api/auth/confirm/${user.getVerifyMailJwt()}`;
 
-  await sendEmail({
-    email: user.email,
-    subject: 'Camaphoot Verify Email',
-    message,
-  });
-
   var account = await User.create(user);
-  console.log(account);
+
   if (account != null) {
+    await sendEmail({
+      email: user.email,
+      subject: 'Camaphoot Verify Email',
+      message,
+    });
+
     res.status(200).json({ success: true, data: 'Email sent' });
   }
   return new ErrorResponse('Create account fail', 500);
@@ -34,12 +34,12 @@ exports.verify = asyncHandler(async (req, res, next) => {
     req.params.token,
     process.env.VERIFY_MAIL_JWT_SECRET
   );
-  console.log(decoded.email);
+
   const user = await User.findOneAndUpdate(
     { email: decoded.email },
     { verified: true }
   );
-  console.log(user);
+
   if (user != null) {
     return res.status(200).json({ success: true, data: user.toAuthJSON() });
   }
@@ -50,7 +50,7 @@ exports.logIn = async (req, res, next) => {
   if (req.err) {
     return next(req.err);
   }
-  console.log(req.user);
+
   if (!req.user.verified) {
     return next(new ErrorResponse('Your account has not been verified', 500));
   }

@@ -3,7 +3,9 @@ const asyncHandler = require('../../middleware/async');
 const ErrorResponse = require('../../utils/errorResponse');
 
 exports.getPresentationById = asyncHandler(async (req, res, next) => {
-  var item = await Presentation.findById(req.params.id);
+  var item = await Presentation.findById(req.params.id).select(
+    '-questions.trueAns'
+  );
   res.status(200).json({ success: true, data: item });
 });
 
@@ -19,6 +21,14 @@ exports.getMyPresentation = asyncHandler(async (req, res, next) => {
   res.status(200).json({ success: true, data: items });
 });
 
+exports.getMyPresentationById = asyncHandler(async (req, res, next) => {
+  var item = await Presentation.findOne({
+    id: req.params.id,
+    userCreate: req.user.id,
+  });
+  res.status(200).json({ success: true, data: item });
+});
+
 exports.createPresentation = asyncHandler(async (req, res, next) => {
   var createItem = req.body;
   createItem.userCreate = req.user.id;
@@ -27,7 +37,6 @@ exports.createPresentation = asyncHandler(async (req, res, next) => {
 });
 
 exports.updatePresentation = asyncHandler(async (req, res, next) => {
-  console.log(req.params.id);
   var presentation = await Presentation.findByIdAndUpdate(
     req.params.id,
     { questions: req.body.questions },

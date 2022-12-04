@@ -25,7 +25,7 @@ const User = new mongoose.Schema({
     // required: [true, 'Please add a password'],
     // minlength: 6,
   },
-  ownGroup: [
+  ownGroups: [
     {
       id: String,
       groupName: String,

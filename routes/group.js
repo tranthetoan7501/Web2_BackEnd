@@ -4,6 +4,7 @@ const passport = require('passport');
 
 const {
   getGroups,
+  getMyGroups,
   createGroup,
   generateLinkJoinGroup,
   joinGroup,
@@ -17,6 +18,10 @@ router
   .route('/')
   .get(passport.authenticate('jwt', { session: false }), getGroups)
   .post(passport.authenticate('jwt', { session: false }), createGroup);
+
+router
+  .route('/mygroups')
+  .get(passport.authenticate('jwt', { session: false }), getMyGroups);
 
 router
   .route('/invitelink')

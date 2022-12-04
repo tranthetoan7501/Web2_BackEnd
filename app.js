@@ -6,6 +6,7 @@ const passportLocal = require('./middleware/passport');
 const colors = require('colors');
 const cors = require('cors');
 const cookieSession = require('cookie-session');
+const socket = require('socket.io');
 
 const errorHandler = require('./middleware/error');
 // db
@@ -48,6 +49,29 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 console.log('USing port: ', PORT);
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`App running on port ${PORT}...`);
+});
+
+const io = socket(server, {
+  cors: {
+    origin: 'http://localhost:3000',
+    credentials: true,
+  },
+});
+
+global.onlineUsers = new Map();
+io.on('connection', (socket) => {
+  global.chatSocket = socket;
+  socket.on('add-user', (userId) => {
+    onlineUsers.set(userId, socket.id);
+    console.log(socket.id + userId);
+  });
+
+  socket.on('send-msg', (data) => {
+    const sendUserSocket = onlineUsers.get(data.to);
+    if (sendUserSocket) {
+      socket.to(sendUserSocket).emit('msg-recieve', data.msg);
+    }
+  });
 });

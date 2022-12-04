@@ -9,11 +9,21 @@ const {
   updatePresentation,
   deletePresentation,
   getMyPresentation,
+  getMyPresentationById,
 } = require('../controllers/presentation/presentController');
 
 router
   .route('/myPresentation')
   .get(passport.authenticate('jwt', { session: false }), getMyPresentation);
+
+router
+  .route('/myPresentation/:id')
+  .get(passport.authenticate('jwt', { session: false }), getMyPresentationById);
+
+router
+  .route('/create')
+  .post(passport.authenticate('jwt', { session: false }), createPresentation);
+
 router
   .route('/ofuser/:id')
   .get(
@@ -22,12 +32,8 @@ router
   );
 
 router
-  .route('/create')
-  .post(passport.authenticate('jwt', { session: false }), createPresentation);
-
-router
   .route('/:id')
-  .get(passport.authenticate('jwt', { session: false }), getPresentationById)
+  .get(getPresentationById)
   .put(passport.authenticate('jwt', { session: false }), updatePresentation)
   .delete(passport.authenticate('jwt', { session: false }), deletePresentation);
 

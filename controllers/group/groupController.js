@@ -15,7 +15,13 @@ exports.getGroupById = asyncHandler(async (req, res, next) => {
 
 exports.getGroups = asyncHandler(async (req, res, next) => {
   const groups = await Group.find();
-  res.status(200).json({ success: true, limit: groups.length, data: groups });
+  res.status(200).json({ success: true, data: groups });
+});
+
+exports.getMyGroups = asyncHandler(async (req, res, next) => {
+  console.log(req.user.id);
+  const groups = await Group.find({ 'owner.id': req.user.id });
+  res.status(200).json({ success: true, data: groups });
 });
 
 exports.createGroup = asyncHandler(async (req, res, next) => {
@@ -25,6 +31,7 @@ exports.createGroup = asyncHandler(async (req, res, next) => {
 
   const groupCreate = await Group.create(group);
   var ownGroupList = req.user.ownGroups;
+  console.log(ownGroupList);
   ownGroupList.push({
     id: groupCreate.id,
     groupName: groupCreate.groupName,
@@ -113,12 +120,12 @@ exports.joinGroup = asyncHandler(async (req, res, next) => {
 
 exports.generateLinkEmail = asyncHandler(async (req, res, next) => {
   const user = await User.findOne({ username: req.body.username });
-  console.log(user);
+
   if (!user) {
     return next(new ErrorResponse('Can not find user', 500));
   }
   const group = await Group.findById(req.body.id);
-  console.log(group);
+
   if (group != null && req.user.id == group.owner.id) {
     var linkInvite = `${
       process.env.BASE_URL
