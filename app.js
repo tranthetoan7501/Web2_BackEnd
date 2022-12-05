@@ -60,18 +60,58 @@ const io = socket(server, {
   },
 });
 
-global.onlineUsers = new Map();
+global.userInRoom = new Map();
+global.roomStatus = new Map();
+global.SocketIo = io;
 io.on('connection', (socket) => {
   global.chatSocket = socket;
-  socket.on('add-user', (userId) => {
-    onlineUsers.set(userId, socket.id);
-    console.log(socket.id + userId);
+  socket.on('add-user', (userName) => {
+    const room = userInRoom.get(userName);
+    if (room) {
+      socket.join(room);
+    }
+    console.log(room);
+  });
+  //Socket handle teacher emit
+  socket.on('open-room', (userRoom) => {
+    //userInRoom.set;
+    socket.join(userRoom.room);
+    userInRoom.set(userRoom.name, userRoom.room);
+    roomStatus.set(userRoom.room, true);
+    console.log(roomStatus);
+    console.log(userRoom.room);
   });
 
-  socket.on('send-msg', (data) => {
-    const sendUserSocket = onlineUsers.get(data.to);
-    if (sendUserSocket) {
-      socket.to(sendUserSocket).emit('msg-recieve', data.msg);
-    }
+  socket.on('start-room', (data) => {
+    roomStatus.set(data, false);
+    console.log(`start ${roomStatus}`);
+    console.log(data);
   });
+
+  socket.on('send-student', (roomMsg) => {
+    console.log(roomMsg);
+    socket.to(roomMsg.room).emit('recieve-student', roomMsg.msg);
+  });
+
+  //Socket handle Student emit
+  socket.on('join-room', (userRoom) => {
+    console.log(userRoom);
+    socket.join(userRoom.room);
+    userInRoom.set(userRoom.name, userRoom.room);
+    console.log(userInRoom);
+  });
+
+  socket.on('send-teacher', (roomMsg) => {
+    console.log(roomMsg);
+    socket.to(roomMsg.room).emit('recieve-teacher', roomMsg.msg);
+  });
+
+  // socket.on('send-student', (data) => {
+  //   const sendUserSocket = onlineUsers.get(data.to);
+  //   if (sendUserSocket) {
+  //     socket.to(sendUserSocket).emit('recieve-student', data.msg);
+  //   }
+  // });
+
+  socket.on('start-msg', (data) => {});
 });

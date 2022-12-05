@@ -8,13 +8,13 @@ const {
   getPresentationByUserId,
   updatePresentation,
   deletePresentation,
-  getMyPresentation,
+  getMyPresentations,
   getMyPresentationById,
 } = require('../controllers/presentation/presentController');
 
 router
   .route('/myPresentation')
-  .get(passport.authenticate('jwt', { session: false }), getMyPresentation);
+  .get(passport.authenticate('jwt', { session: false }), getMyPresentations);
 
 router
   .route('/myPresentation/:id')

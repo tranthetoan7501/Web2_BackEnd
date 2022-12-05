@@ -1,34 +1,35 @@
 const mongoose = require('mongoose');
 const Presentation = new mongoose.Schema({
-  //   code: {
-  //     type: String,
-  //     require: [true, 'Please add a group name'],
-  //     trim: true,
-  //     maxlength: [6, 'Code must have 6 characters'],
-  //     minlength: [6, 'Code must have 6 characters'],
-  //     unique: true,
-  //   },
   userCreate: {
     type: mongoose.Schema.Types.ObjectId,
     require: true,
+  },
+  name: {
+    type: String,
+    required: [true, 'Name must have'],
+    unique: [true, 'Name is exist'],
   },
   questions: [
     {
       content: {
         type: String,
-        require: true,
+        require: [true, 'require Content of question'],
       },
       ansA: {
         type: String,
-        require: true,
+        require: [true, 'require ans A'],
       },
       ansB: {
         type: String,
-        require: true,
+        require: [true, 'require ans B'],
       },
       ansC: {
         type: String,
-        require: true,
+        require: [true, 'require ans C'],
+      },
+      ansD: {
+        type: String,
+        require: [true, 'require ans D'],
       },
       time: {
         type: Number,
@@ -40,9 +41,16 @@ const Presentation = new mongoose.Schema({
       },
     },
   ],
+  numberOfQuestion: {
+    type: Number,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
   },
 });
+Presentation.pre('save', async function (next) {
+  this.numberOfQuestion = this.questions.length;
+});
+
 module.exports = mongoose.model('Presentation', Presentation);

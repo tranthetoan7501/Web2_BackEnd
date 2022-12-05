@@ -28,7 +28,7 @@ exports.protect = asyncHandler(async (req, res, next) => {
   try {
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log(decoded.id);
+
     req.user = await User.findById(decoded.id);
     if (req.user.Islogin == false) {
       return next(new ErrorResponse('Yout must to login', 401));

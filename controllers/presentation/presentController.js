@@ -3,10 +3,14 @@ const asyncHandler = require('../../middleware/async');
 const ErrorResponse = require('../../utils/errorResponse');
 
 exports.getPresentationById = asyncHandler(async (req, res, next) => {
-  var item = await Presentation.findById(req.params.id).select(
-    '-questions.trueAns'
-  );
-  res.status(200).json({ success: true, data: item });
+  if (roomStatus.get(req.params.id)) {
+    var item = await Presentation.findById(req.params.id).select(
+      '-questions.trueAns'
+    );
+    res.status(200).json({ success: true, data: item });
+  } else {
+    return next(new ErrorResponse('Room is not active', 500));
+  }
 });
 
 exports.getPresentationByUserId = asyncHandler(async (req, res, next) => {
@@ -16,8 +20,10 @@ exports.getPresentationByUserId = asyncHandler(async (req, res, next) => {
   res.status(200).json({ success: true, data: items });
 });
 
-exports.getMyPresentation = asyncHandler(async (req, res, next) => {
-  var items = await Presentation.find({ userCreate: req.user.id });
+exports.getMyPresentations = asyncHandler(async (req, res, next) => {
+  var items = await Presentation.find({ userCreate: req.user.id }).select(
+    '-questions'
+  );
   res.status(200).json({ success: true, data: items });
 });
 
