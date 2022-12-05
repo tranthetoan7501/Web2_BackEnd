@@ -10,6 +10,7 @@ const {
   deletePresentation,
   getMyPresentations,
   getMyPresentationById,
+  getPresentationByPin,
 } = require('../controllers/presentation/presentController');
 
 router
@@ -31,6 +32,7 @@ router
     getPresentationByUserId
   );
 
+router.route('/getbypin/:pin').get(getPresentationByPin);
 router
   .route('/:id')
   .get(getPresentationById)

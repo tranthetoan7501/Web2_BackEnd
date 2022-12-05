@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Presentation = new mongoose.Schema({
   userCreate: {
     type: mongoose.Schema.Types.ObjectId,
-    require: true,
+    required: true,
   },
   name: {
     type: String,
@@ -13,23 +13,23 @@ const Presentation = new mongoose.Schema({
     {
       content: {
         type: String,
-        require: [true, 'require Content of question'],
+        required: [true, 'require Content of question'],
       },
       ansA: {
         type: String,
-        require: [true, 'require ans A'],
+        required: [true, 'require ans A'],
       },
       ansB: {
         type: String,
-        require: [true, 'require ans B'],
+        required: [true, 'require ans B'],
       },
       ansC: {
         type: String,
-        require: [true, 'require ans C'],
+        required: [true, 'require ans C'],
       },
       ansD: {
         type: String,
-        require: [true, 'require ans D'],
+        required: [true, 'require ans D'],
       },
       time: {
         type: Number,
@@ -37,7 +37,7 @@ const Presentation = new mongoose.Schema({
       },
       trueAns: {
         type: String,
-        require: true,
+        required: true,
       },
     },
   ],

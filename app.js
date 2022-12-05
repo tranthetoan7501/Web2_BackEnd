@@ -106,12 +106,5 @@ io.on('connection', (socket) => {
     socket.to(roomMsg.room).emit('recieve-teacher', roomMsg.msg);
   });
 
-  // socket.on('send-student', (data) => {
-  //   const sendUserSocket = onlineUsers.get(data.to);
-  //   if (sendUserSocket) {
-  //     socket.to(sendUserSocket).emit('recieve-student', data.msg);
-  //   }
-  // });
-
   socket.on('start-msg', (data) => {});
 });

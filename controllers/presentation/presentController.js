@@ -1,10 +1,23 @@
 const Presentation = require('../../models/presentation');
+const Game = require('../../models/game');
 const asyncHandler = require('../../middleware/async');
 const ErrorResponse = require('../../utils/errorResponse');
 
 exports.getPresentationById = asyncHandler(async (req, res, next) => {
   if (roomStatus.get(req.params.id)) {
     var item = await Presentation.findById(req.params.id).select(
+      '-questions.trueAns'
+    );
+    res.status(200).json({ success: true, data: item });
+  } else {
+    return next(new ErrorResponse('Room is not active', 500));
+  }
+});
+
+exports.getPresentationByPin = asyncHandler(async (req, res, next) => {
+  var game = await Game.findOne({ pin: req.params.pin });
+  if (game.isOpen) {
+    var item = await Presentation.findById(game.presentationId).select(
       '-questions.trueAns'
     );
     res.status(200).json({ success: true, data: item });
