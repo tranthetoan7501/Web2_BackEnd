@@ -7,6 +7,7 @@ const colors = require('colors');
 const cors = require('cors');
 const cookieSession = require('cookie-session');
 const socket = require('socket.io');
+const sockets = require('./utils/sockets');
 
 const errorHandler = require('./middleware/error');
 // db
@@ -60,51 +61,6 @@ const io = socket(server, {
   },
 });
 
-global.userInRoom = new Map();
-global.roomStatus = new Map();
 global.SocketIo = io;
-io.on('connection', (socket) => {
-  global.chatSocket = socket;
-  socket.on('add-user', (userName) => {
-    const room = userInRoom.get(userName);
-    if (room) {
-      socket.join(room);
-    }
-    console.log(room);
-  });
-  //Socket handle teacher emit
-  socket.on('open-room', (userRoom) => {
-    //userInRoom.set;
-    socket.join(userRoom.room);
-    userInRoom.set(userRoom.name, userRoom.room);
-    roomStatus.set(userRoom.room, true);
-    console.log(roomStatus);
-    console.log(userRoom.room);
-  });
 
-  socket.on('start-room', (data) => {
-    roomStatus.set(data, false);
-    console.log(`start ${roomStatus}`);
-    console.log(data);
-  });
-
-  socket.on('send-student', (roomMsg) => {
-    console.log(roomMsg);
-    socket.to(roomMsg.room).emit('recieve-student', roomMsg.msg);
-  });
-
-  //Socket handle Student emit
-  socket.on('join-room', (userRoom) => {
-    console.log(userRoom);
-    socket.join(userRoom.room);
-    userInRoom.set(userRoom.name, userRoom.room);
-    console.log(userInRoom);
-  });
-
-  socket.on('send-teacher', (roomMsg) => {
-    console.log(roomMsg);
-    socket.to(roomMsg.room).emit('recieve-teacher', roomMsg.msg);
-  });
-
-  socket.on('start-msg', (data) => {});
-});
+sockets.listen(io);
