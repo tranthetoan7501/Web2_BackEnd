@@ -22,7 +22,7 @@ exports.listen = (io) => {
       userInRoom.set(userRoom.name, userRoom.room);
 
       //log
-      console.log('open-room');
+      console.log('create-room');
       console.log(userInRoom);
       console.log(userRoom.room);
     });
