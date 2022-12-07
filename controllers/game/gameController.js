@@ -7,6 +7,7 @@ exports.createGame = asyncHandler(async (req, res, next) => {
   var game = new Game();
   game.userCreateId = req.user.id;
   game.presentationId = req.body.presentationId;
+
   const createdGame = await Game.create(game);
   const presentation = await Presentation.findById(createdGame.presentationId);
   res.status(200).json({

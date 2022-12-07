@@ -16,19 +16,25 @@ exports.getPresentationById = asyncHandler(async (req, res, next) => {
 
 // used when user join
 exports.getPresentationByPin = asyncHandler(async (req, res, next) => {
-  console.log(req.params);
   const game = await Game.findOne({ pin: req.params.pin });
-  console.log(game);
+
   if (!game) {
     return next(new ErrorResponse('Can not find game with pin', 404));
   }
-
   if (game.isOpen) {
-    if (game.participants.includes(req.params.name)) {
+    var findMember = game.participants.find(
+      (obj) => obj.name == req.params.name
+    );
+    if (findMember) {
       return next(new ErrorResponse('Username is exist', 500));
     }
-    game.participants.push(req.params.name);
-    await game.save();
+    var list = game.participants;
+    list.push({ name: req.params.name });
+    await Game.findByIdAndUpdate(
+      game.id,
+      { participants: list },
+      { runValidators: true }
+    );
     var item = await Presentation.findById(game.presentationId).select(
       '-questions.trueAns'
     );

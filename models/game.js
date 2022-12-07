@@ -12,11 +12,14 @@ const Game = new mongoose.Schema({
   pin: {
     type: String,
   },
-  participants: [
-    {
-      type: String,
-    },
-  ],
+  participants: {
+    type: [
+      {
+        name: String,
+      },
+    ],
+    unique: false,
+  },
   isOpen: {
     type: Boolean,
     default: true,
@@ -24,17 +27,16 @@ const Game = new mongoose.Schema({
 });
 
 Game.pre('save', async function (next) {
-  if (this.isModified('pin')) {
-    var result = '';
-    var characters =
-      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    var charactersLength = characters.length;
-    for (var i = 0; i < 6; i++) {
-      result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    }
-    this.pin = result;
-    console.log('created new game with new pin: ', result);
+  var result = '';
+  var characters =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  var charactersLength = characters.length;
+  for (var i = 0; i < 6; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
   }
+  this.pin = result;
+  this.participants.push({ name: this.pin });
+  console.log('created new game with new pin: ', result);
 });
 
 module.exports = mongoose.model('Game', Game);
