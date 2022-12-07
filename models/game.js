@@ -26,8 +26,8 @@ Game.pre('save', async function (next) {
   for (var i = 0; i < 6; i++) {
     result += characters.charAt(Math.floor(Math.random() * charactersLength));
   }
-  console.log('dasdas');
   this.pin = result;
+  console.log("created new game with new pin: ", result)
 });
 
 module.exports = mongoose.model('Game', Game);
