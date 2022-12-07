@@ -32,7 +32,7 @@ router
     getPresentationByUserId
   );
 
-router.route('/getbypin/:pin').get(getPresentationByPin);
+router.route('/join/:name/:pin').put(getPresentationByPin);
 router
   .route('/:id')
   .get(getPresentationById)

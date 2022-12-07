@@ -4,25 +4,37 @@ const asyncHandler = require('../../middleware/async');
 const ErrorResponse = require('../../utils/errorResponse');
 
 exports.getPresentationById = asyncHandler(async (req, res, next) => {
-  if (true /*roomStatus.get(req.params.id)*/) {
-    var item = await Presentation.findById(req.params.id).select(
-      '-questions.trueAns'
-    );
+  var item = await Presentation.findById(req.params.id).select(
+    '-questions.trueAns'
+  );
+  if (item) {
     res.status(200).json({ success: true, data: item });
   } else {
-    return next(new ErrorResponse('Room is not active', 500));
+    return next(new ErrorResponse('Can not find presentation by id', 500));
   }
 });
 
+// used when user join
 exports.getPresentationByPin = asyncHandler(async (req, res, next) => {
-  var game = await Game.findOne({ pin: req.params.pin });
+  console.log(req.params);
+  const game = await Game.findOne({ pin: req.params.pin });
+  console.log(game);
+  if (!game) {
+    return next(new ErrorResponse('Can not find game with pin', 404));
+  }
+
   if (game.isOpen) {
+    if (game.participants.includes(req.params.name)) {
+      return next(new ErrorResponse('Username is exist', 500));
+    }
+    game.participants.push(req.params.name);
+    await game.save();
     var item = await Presentation.findById(game.presentationId).select(
       '-questions.trueAns'
     );
     res.status(200).json({ success: true, data: item });
   } else {
-    return next(new ErrorResponse('Room is not active', 500));
+    return next(new ErrorResponse('Room is not active', 404));
   }
 });
 
@@ -37,13 +49,14 @@ exports.getMyPresentations = asyncHandler(async (req, res, next) => {
   var items = await Presentation.find({ userCreate: req.user.id }).select(
     '-questions'
   );
-  console.log('\n\item: ', items)
+  console.log('\nitem: ', items);
   res.status(200).json({ success: true, data: items });
 });
 
 exports.getMyPresentationById = asyncHandler(async (req, res, next) => {
   var item = await Presentation.findOne({
     _id: req.params.id,
+    userCreate: req.user.id,
   });
   res.status(200).json({ success: true, data: item });
 });
