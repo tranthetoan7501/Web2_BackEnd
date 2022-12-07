@@ -4,7 +4,7 @@ const asyncHandler = require('../../middleware/async');
 const ErrorResponse = require('../../utils/errorResponse');
 
 exports.getPresentationById = asyncHandler(async (req, res, next) => {
-  if (roomStatus.get(req.params.id)) {
+  if (true /*roomStatus.get(req.params.id)*/) {
     var item = await Presentation.findById(req.params.id).select(
       '-questions.trueAns'
     );
