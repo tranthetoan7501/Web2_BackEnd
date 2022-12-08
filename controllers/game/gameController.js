@@ -59,21 +59,26 @@ exports.updateUserScore = asyncHandler(async (req, res, next) => {
   if (!presentation) {
     return next(new ErrorResponse('Can not find presentation', 500));
   }
+  var result = false;
   if (presentation.questions[0].trueAns == req.body.ans) {
     findMember.score = findMember.score + 1;
     console.log(findMember.score);
+    result = true;
   }
 
   //Update score
   game.participants.push(findMember);
   await game.save();
   SocketIo.in(req.params.pin).emit('student-receiver', req.body);
-  res.status(200).json({ success: true, data: game });
+  res.status(200).json({ success: true, data: result });
 });
 
 exports.getGameResult = asyncHandler(async (req, res, next) => {
   const game = await Game.findOne({ pin: req.params.pin });
   if (game) {
+    game.participants = game.participants.filter(function (obj) {
+      return obj.name != req.params.pin;
+    });
     res.status(200).json({ success: true, data: game.participants });
   } else {
     return next(new ErrorResponse('Can not find game by pin', 500));
