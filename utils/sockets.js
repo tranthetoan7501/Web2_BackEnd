@@ -5,9 +5,7 @@ global.activeUsers = new Map();
 
 exports.listen = (io) => {
   io.on('connection', (socket) => {
-
-    console.log("\t\t\t\t\NEW CONNECTION: ", socket.id)
-
+    console.log('\t\t\t\tNEW CONNECTION: ', socket.id);
 
     socket.on('add-user', (userName) => {
       console.log('connection');
@@ -26,10 +24,10 @@ exports.listen = (io) => {
       userInRoom.set(userRoom.name, userRoom.room);
 
       //log
-      console.log('\t\t\t\t\t\t\tsocket id: ', socket.id)
+      console.log('\t\t\t\t\t\t\tsocket id: ', socket.id);
       console.log('create-room');
       console.log('userInRoom: ', userInRoom);
-      console.log('userRoom.ROOM                               ROOM: ', userRoom.room);
+      console.log('userRoom.ROOM           ROOM: ', userRoom.room);
     });
 
     socket.on('student-sender', (roomMsg) => {

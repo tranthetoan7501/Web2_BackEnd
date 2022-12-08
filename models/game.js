@@ -16,6 +16,10 @@ const Game = new mongoose.Schema({
     type: [
       {
         name: String,
+        score: {
+          type: Number,
+          default: 0,
+        },
       },
     ],
     unique: false,
@@ -27,16 +31,18 @@ const Game = new mongoose.Schema({
 });
 
 Game.pre('save', async function (next) {
-  var result = '';
-  var characters =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  var charactersLength = characters.length;
-  for (var i = 0; i < 6; i++) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  if (this.isModified('userCreateId')) {
+    var result = '';
+    var characters =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for (var i = 0; i < 6; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    this.pin = result;
+    this.participants.push({ name: this.pin });
+    console.log('created new game with new pin: ', result);
   }
-  this.pin = result;
-  this.participants.push({ name: this.pin });
-  console.log('created new game with new pin: ', result);
 });
 
 module.exports = mongoose.model('Game', Game);

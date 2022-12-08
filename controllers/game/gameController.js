@@ -34,3 +34,40 @@ exports.updateGameStatus = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse('Can not find game', 500));
   }
 });
+
+exports.updateUserScore = asyncHandler(async (req, res, next) => {
+  console.log(req.params.pin);
+  const game = await Game.findOne({ pin: req.params.pin });
+  if (!game) {
+    return next(new ErrorResponse('Can not find game', 500));
+  }
+
+  //user score
+  var findMember = game.participants.find(
+    (obj) => obj.name == req.body.username
+  );
+  if (!findMember) {
+    return next(new ErrorResponse('Can not find user in participants', 500));
+  }
+
+  //remove old data
+  game.participants = game.participants.filter(function (obj) {
+    return obj.name != req.body.username;
+  });
+
+  //presentation
+  var presentation = await Presentation.findById(game.presentationId);
+  if (!presentation) {
+    return next(new ErrorResponse('Can not find presentation', 500));
+  }
+  if (presentation.questions[0].trueAns == req.body.ans) {
+    findMember.score = findMember.score + 1;
+    console.log(findMember.score);
+  }
+
+  //Update score
+  game.participants.push(findMember);
+  await game.save();
+  SocketIo.in(req.params.pin).emit('student-receiver', req.body);
+  res.status(200).json({ success: true, data: game });
+});
