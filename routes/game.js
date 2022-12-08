@@ -6,6 +6,7 @@ const {
   createGame,
   updateGameStatus,
   updateUserScore,
+  getGameResult,
 } = require('../controllers/game/gameController');
 router
   .route('/creategame')
@@ -14,6 +15,10 @@ router
   .route('/updateStatus')
   .put(passport.authenticate('jwt', { session: false }), updateGameStatus);
 
-router.route('/answer/:pin').put(updateUserScore);
+router.route('/gameresult/:pin').get(getGameResult);
+
+router
+  .route('/answer/:pin')
+  .put(passport.authenticate('jwt', { session: false }), updateUserScore);
 
 module.exports = router;

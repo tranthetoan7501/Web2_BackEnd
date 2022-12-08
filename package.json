@@ -35,7 +35,6 @@
     "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",
     "prettier": "^2.7.1",
-    "socket.io": "^4.5.4",
-    "underscore": "^1.13.6"
+    "socket.io": "^4.5.4"
   }
 }

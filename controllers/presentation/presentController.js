@@ -25,7 +25,6 @@ exports.getPresentationByPin = asyncHandler(async (req, res, next) => {
     var findMember = game.participants.find(
       (obj) => obj.name == req.params.name
     );
-    console.log(findMember);
     if (findMember) {
       return next(new ErrorResponse('Username is exist', 500));
     }

@@ -43,6 +43,8 @@ Game.pre('save', async function (next) {
     this.participants.push({ name: this.pin });
     console.log('created new game with new pin: ', result);
   }
+  this.pin = result;
+  console.log('created new game with new pin: ', result);
 });
 
 module.exports = mongoose.model('Game', Game);
