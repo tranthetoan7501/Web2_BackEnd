@@ -46,7 +46,7 @@ router.get('/google', passport.authenticate('google', ['profile', 'email']));
 router.get(
   '/auth/google/callback',
   passport.authenticate('google', {
-    successRedirect: 'http://localhost:3000',
+    successRedirect: process.env.CLIENT_BASE_URL,
     failureRedirect: '/login/failed',
   })
 );
@@ -54,7 +54,7 @@ router.get(
 //đăng xuất thì chuyển hướng đến trang này
 router.get('/auth/logout', (req, res) => {
   req.logout();
-  res.redirect('http://localhost:3000');
+  res.redirect(process.env.CLIENT_BASE_URL);
 });
 
 module.exports = router;
