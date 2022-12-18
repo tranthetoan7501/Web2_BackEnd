@@ -1,11 +1,21 @@
-const UserModel = require('../../models/user')
+const UserModel = require('../../models/user');
 
 exports.findUserByGoogleID = async (googleID) => {
-    const user = await UserModel.findOne({googleId: googleID})
-    return user
-}
+  const user = await UserModel.findOne({ googleId: googleID });
+  return user;
+};
 
 exports.findUserByEmail = async (email) => {
-    const user = await UserModel.findOne({email: email})
-    return user
-}
+  const user = await UserModel.findOne({ email: email });
+  return user;
+};
+
+exports.createUser = (data) => {
+  var user = new User();
+  user.username = data.body.username;
+  user.email = data.body.email;
+  user.password = data.body.password;
+  user.verified = true;
+  user.tokenCode = Math.random().toString();
+  return user;
+};

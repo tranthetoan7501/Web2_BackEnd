@@ -39,8 +39,10 @@ passport.use(
     async function (jwt_payload, done) {
       try {
         const user = await User.findOne({ email: jwt_payload.email });
-
-        if (user && user.tokenCode == jwt_payload.code) {
+        if (
+          (user && user.tokenCode == jwt_payload.code) ||
+          (user && !jwt_payload.code)
+        ) {
           return done(null, user);
         } else {
           return done(null, false);
@@ -62,32 +64,7 @@ passport.use(
       scope: ['profile', 'email'],
     },
     async (accessToken, refreshToken, profile, done) => {
-      //Check if google profile exist.
-      if (profile.id) {
-        const gmail = profile.emails[0].value;
-        var existingUser;
-        if (gmail) {
-          existingUser = await userService.findUserByEmail(gmail);
-        } else {
-          existingUser = await userService.findUserByGoogleID(profile.id);
-        }
-        if (existingUser) {
-          done(null, { success: true, data: existingUser.toAuthJSON() });
-        } else {
-          var user = new User();
-          user.username =
-            profile.name.familyName + ' ' + profile.name.givenName;
-          user.googleId = profile.id;
-          user.email = profile.emails[0].value;
-          user.verified = true;
-          try {
-            const newUser = await User.create(user.toAuthJSON());
-            done(null, { success: true, data: newUser });
-          } catch (err) {
-            done(null, { success: true, data: user.toAuthJSON() });
-          }
-        }
-      }
+      done(null, profile);
     }
   )
 );

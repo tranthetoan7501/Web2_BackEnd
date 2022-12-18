@@ -2,21 +2,17 @@ const User = require('../../models/user');
 const asyncHandler = require('../../middleware/async');
 const ErrorResponse = require('../../utils/errorResponse');
 const sendEmail = require('../../utils/sendEmail');
+const { successResponse } = require('../../utils/response');
 const jwt = require('jsonwebtoken');
 const AuthService = require('./authService');
+const user = require('../../models/user');
 
 exports.signUp = asyncHandler(async (req, res, next) => {
-  var user = new User();
-  user.username = req.body.username;
-  user.email = req.body.email;
-  user.password = req.body.password;
-  user.tokenCode = Math.random().toString();
+  const user = AuthService.createUser(req);
 
-  const message = `Verify your email. CLick link below to verify : \n\n ${
-    process.env.BASE_URL
-  }/api/auth/confirm/${user.getVerifyMailJwt()}`;
+  const message = AuthService.verifyMessage(user);
 
-  var account = await User.create(user);
+  const account = await User.create(user);
 
   if (account != null) {
     await sendEmail({
@@ -24,26 +20,19 @@ exports.signUp = asyncHandler(async (req, res, next) => {
       subject: 'Camaphoot Verify Email',
       message,
     });
-
-    res.status(200).json({ success: true, data: 'Email sent' });
+    successResponse('Email sent', res);
   }
   return new ErrorResponse('Create account fail', 500);
 });
+
 exports.verify = asyncHandler(async (req, res, next) => {
-  const decoded = jwt.verify(
-    req.params.token,
-    process.env.VERIFY_MAIL_JWT_SECRET
-  );
+  const verifiedUser = await AuthService.verify(req.params.token);
 
-  const user = await User.findOneAndUpdate(
-    { email: decoded.email },
-    { verified: true }
-  );
-
-  if (user != null) {
-    return res.status(200).json({ success: true, data: user.toAuthJSON() });
+  if (verifiedUser != null) {
+    successResponse(verifiedUser.toAuthJSON(), res);
+  } else {
+    return next(new ErrorResponse('Can not verify your account', 500));
   }
-  return next(new ErrorResponse('Can not verify your account', 500));
 });
 
 exports.logIn = async (req, res, next) => {
@@ -65,31 +54,25 @@ exports.logIn = async (req, res, next) => {
         runValidators: true,
       }
     );
-
-    AuthService.sendTokenResponse(req.user, 200, res);
+    successResponse(user.toAuthJSON(), res);
+    //AuthService.sendTokenResponse(req.user, 200, res);
   } else {
-    // Sửa response này
     return next(new ErrorResponse('Login fail !!!', 500));
   }
 };
 
 exports.logOut = asyncHandler(async (req, res, next) => {
-  const user = await User.findByIdAndUpdate(
-    req.user.id,
-    { tokenCode: '' },
-    {
-      new: true,
-      runValidators: true,
-    }
-  );
+  if (req.user.tokenCode) {
+    await User.findByIdAndUpdate(
+      req.user.id,
+      { tokenCode: '--' },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+  }
 
-  res.cookie('token', 'none', {
-    expires: new Date(Date.now() + 10 * 1000),
-    httpOnly: true,
-  });
-
-  res.status(200).json({
-    success: true,
-    data: {},
-  });
+  //res.redirect('http://localhost:3000');
+  successResponse({}, res);
 });

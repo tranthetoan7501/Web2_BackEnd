@@ -36,6 +36,7 @@ exports.updateGameStatus = asyncHandler(async (req, res, next) => {
 });
 
 exports.updateUserScore = asyncHandler(async (req, res, next) => {
+  //SocketIo.in(req.params.pin).emit('teacher-receiver', 'adadfafdfadfd');
   const game = await Game.findOne({ pin: req.params.pin });
   if (!game) {
     return next(new ErrorResponse('Can not find game', 500));
@@ -69,7 +70,7 @@ exports.updateUserScore = asyncHandler(async (req, res, next) => {
   //Update score
   game.participants.push(findMember);
   await game.save();
-  SocketIo.in(req.params.pin).emit('student-receiver', req.body);
+  //SocketIo.in(req.params.pin).emit('teacher-receiver', req.body);
   res.status(200).json({ success: true, data: result });
 });
 

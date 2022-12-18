@@ -7,6 +7,7 @@ const {
   getUsers,
   getUserById,
   getProfile,
+  getUserGoogleAccount,
 } = require('../controllers/user/userController');
 const { logIn } = require('../controllers/auth/authController');
 
@@ -16,27 +17,14 @@ router
 router
   .route('/profile')
   .get(passport.authenticate('jwt', { session: false }), getProfile);
-router
-  .route('/:id')
-  .get(passport.authenticate('jwt', { session: false }), getUserById);
 
 // Google auth
-router.get('/login/success', async (req, res) => {
-  if (req.user) {
-    res.status(200).json({
-      error: false,
-      message: 'Successfully Loged In',
-      user: req.user,
-    });
-  } else {
-    res.status(403).json({ error: true, message: 'Not Authorized' });
-  }
-});
+router.get('/login/success', getUserGoogleAccount);
 
 router.get('/login/failed', (req, res) => {
   res.status(401).json({
-    error: true,
-    message: 'Log in failure',
+    success: false,
+    data: 'Log in failure',
   });
 });
 
@@ -52,9 +40,13 @@ router.get(
 );
 
 //đăng xuất thì chuyển hướng đến trang này
-router.get('/auth/logout', (req, res) => {
+router.get('/logout', (req, res) => {
   req.logout();
   res.redirect('http://localhost:3000');
 });
+
+router
+  .route('/:id')
+  .get(passport.authenticate('jwt', { session: false }), getUserById);
 
 module.exports = router;
