@@ -14,6 +14,7 @@ const User = new mongoose.Schema({
   email: {
     type: String,
     unique: true,
+    required: [true, 'Please add a email'],
     match: [
       /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
       'Please add a valid email',
@@ -22,8 +23,8 @@ const User = new mongoose.Schema({
   password: {
     type: String,
     select: false,
-    // required: [true, 'Please add a password'],
-    // minlength: 6,
+    required: [true, 'Please add a password'],
+    minlength: [6, 'Password must have more than 6 characters'],
   },
   ownGroups: [
     {

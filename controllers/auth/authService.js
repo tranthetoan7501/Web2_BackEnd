@@ -1,7 +1,6 @@
 const User = require('../../models/user');
 const jwt = require('jsonwebtoken');
 exports.sendTokenResponse = (user, statusCode, res) => {
-  // Create token
   const token = user.getSignedJwtToken();
 
   const options = {
