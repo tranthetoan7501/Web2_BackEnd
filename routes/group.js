@@ -14,6 +14,8 @@ const {
   getGroupById,
   getMyJoinedGroups,
   unAssignCoOwner,
+  kickMember,
+  deleteGroup,
 } = require('../controllers/group/groupController');
 
 router
@@ -49,10 +51,14 @@ router
 router
   .route('/unassigncoowner')
   .put(passport.authenticate('jwt', { session: false }), unAssignCoOwner);
+router
+  .route('/kickmember')
+  .put(passport.authenticate('jwt', { session: false }), kickMember);
 
 router
   .route('/:id')
-  .get(passport.authenticate('jwt', { session: false }), getGroupById);
+  .get(passport.authenticate('jwt', { session: false }), getGroupById)
+  .delete(passport.authenticate('jwt', { session: false }), deleteGroup);
 
 router.route('/mailjoin/:token').get(joinByMailLink);
 module.exports = router;

@@ -32,10 +32,6 @@ exports.createGroup = asyncHandler(async (req, res, next) => {
   );
 
   successResponse(groupCreate, res);
-  // res.status(200).json({
-  //   success: true,
-  //   data: groupCreate,
-  // });
 });
 
 exports.getGroupById = asyncHandler(async (req, res, next) => {
@@ -43,7 +39,7 @@ exports.getGroupById = asyncHandler(async (req, res, next) => {
   if (!group) {
     return next(new ErrorResponse('Can not find group with id', 500));
   }
-  res.status(200).json({ success: true, data: group });
+  successResponse(group, res);
 });
 
 exports.getGroups = asyncHandler(async (req, res, next) => {
@@ -138,18 +134,16 @@ exports.generateLinkEmail = asyncHandler(async (req, res, next) => {
   const group = await Group.findById(req.body.id);
 
   if (group != null && req.user.id == group.owner.id) {
-    var linkInvite = `${
-      process.env.BASE_URL
-    }/api/group/mailjoin/${group.getJoinByLinkEmailJwt(user.id)}`;
-
-    const message = `Verify your email. CLick link below to verify : \n\n ${linkInvite}`;
+    const message = GroupService.inviteMessage(
+      group.getJoinByLinkEmailJwt(user.id)
+    );
 
     await sendEmail({
       email: user.email,
       subject: 'Join group invitation',
       message,
     });
-    successResponse(linkInvite, res);
+    successResponse('Sent invite mail', res);
   } else {
     return next(new ErrorResponse('Can not fin group to generate link', 500));
   }
@@ -202,9 +196,10 @@ exports.joinByMailLink = asyncHandler(async (req, res, next) => {
         runValidators: true,
       }
     );
-    res.status(200).json({ success: true, data: {} });
+    successResponse('Join success', res);
+  } else {
+    return next(new ErrorResponse('You was a member of this group', 500));
   }
-  return next(new ErrorResponse('You was a member of this group', 500));
 });
 
 exports.assignCoOwner = asyncHandler(async (req, res, next) => {
@@ -246,14 +241,74 @@ exports.unAssignCoOwner = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse('Can not find this group with groupId', 500));
   }
   if (myGroup.owner.name == req.user.username) {
-    myGroup.coOwner = null;
     user.CoOwnGroups = user.CoOwnGroups.find(
       (obj) => obj.groupName != myGroup.groupName
     );
     await user.save();
+    myGroup.coOwner = null;
     await myGroup.save();
     successResponse('Unassign success', res);
   } else {
     return next(new ErrorResponse('You do not own this group', 500));
+  }
+});
+
+exports.kickMember = asyncHandler(async (req, res, next) => {
+  var user = await User.findOne({ username: req.body.kickUserId });
+  if (!user) {
+    return next(new ErrorResponse('Could not find this user', 500));
+  }
+
+  var myGroup = await Group.findById(req.body.groupId);
+  if (!myGroup) {
+    return next(new ErrorResponse('Can not find this group with groupId', 500));
+  }
+  if (
+    myGroup.owner.name == req.user.username ||
+    myGroup.coOwner.name == req.user.username
+  ) {
+    user.groups = user.groups.find((obj) => obj.groupName != myGroup.groupName);
+    await user.save();
+    myGroup.member = myGroup.member.find((obj) => obj.name != user.username);
+    await myGroup.save();
+    successResponse('Kick success', res);
+  } else {
+    return next(new ErrorResponse('You do not have right', 500));
+  }
+});
+
+exports.deleteGroup = asyncHandler(async (req, res, next) => {
+  var myGroup = await Group.findById(req.params.id);
+  if (!myGroup) {
+    return next(new ErrorResponse('Can not find this group with groupId', 500));
+  }
+  if (myGroup.owner.name == req.user.username) {
+    //remove group in owner's grouplist
+    var owner = await User.findOne({ username: myGroup.owner.name });
+    owner.ownGroups = owner.ownGroups.find(
+      (obj) => obj.groupName != myGroup.groupName
+    );
+    await owner.save();
+
+    //remove group in Coowner's grouplist
+    var coOwner = await User.findOne({ username: myGroup.coOwner.name });
+    coOwner.CoOwnGroups = coOwner.CoOwnGroups.find(
+      (obj) => obj.groupName != myGroup.groupName
+    );
+    await coOwner.save();
+
+    //remove group in each member's grouplist
+    myGroup.member.forEach(async (item) => {
+      var user = await User.findById(item.id);
+      user.groups = user.groups.find(
+        (obj) => obj.groupName != myGroup.groupName
+      );
+      await user.save();
+    });
+
+    await myGroup.delete();
+    successResponse('Delete success', res);
+  } else {
+    return next(new ErrorResponse('You do not have right', 500));
   }
 });
