@@ -30,7 +30,7 @@ exports.verify = asyncHandler(async (req, res, next) => {
   const verifiedUser = await AuthService.verify(req.params.token);
 
   if (verifiedUser != null) {
-    successResponse(verifiedUser.toAuthJSON(), res);
+    successResponse('Verify success', res);
   } else {
     return next(new ErrorResponse('Can not verify your account', 500));
   }

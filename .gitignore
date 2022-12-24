@@ -1,7 +1,5 @@
 node_modules
-
-
-
+configs/config.env
 .DS_Store
 
 .vscode

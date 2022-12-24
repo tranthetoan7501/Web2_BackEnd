@@ -4,25 +4,8 @@ const asyncHandler = require('../../middleware/async');
 const jwt = require('jsonwebtoken');
 const User = require('../../models/user');
 const sendEmail = require('../../utils/sendEmail');
-
-exports.getGroupById = asyncHandler(async (req, res, next) => {
-  const group = await Group.findById(req.params.id);
-  if (!group) {
-    return next(new ErrorResponse('Can not find group with id', 500));
-  }
-  res.status(200).json({ success: true, data: group });
-});
-
-exports.getGroups = asyncHandler(async (req, res, next) => {
-  const groups = await Group.find();
-  res.status(200).json({ success: true, data: groups });
-});
-
-exports.getMyGroups = asyncHandler(async (req, res, next) => {
-  console.log(req.user.id);
-  const groups = await Group.find({ 'owner.id': req.user.id });
-  res.status(200).json({ success: true, data: groups });
-});
+const GroupService = require('./groupService');
+const { successResponse } = require('../../utils/response');
 
 exports.createGroup = asyncHandler(async (req, res, next) => {
   var group = new Group();
@@ -48,10 +31,37 @@ exports.createGroup = asyncHandler(async (req, res, next) => {
     }
   );
 
-  res.status(200).json({
-    success: true,
-    data: groupCreate,
-  });
+  successResponse(groupCreate, res);
+  // res.status(200).json({
+  //   success: true,
+  //   data: groupCreate,
+  // });
+});
+
+exports.getGroupById = asyncHandler(async (req, res, next) => {
+  const group = await Group.findById(req.params.id);
+  if (!group) {
+    return next(new ErrorResponse('Can not find group with id', 500));
+  }
+  res.status(200).json({ success: true, data: group });
+});
+
+exports.getGroups = asyncHandler(async (req, res, next) => {
+  const groups = await Group.find();
+  res.status(200).json({ success: true, data: groups });
+});
+
+exports.getMyGroups = asyncHandler(async (req, res, next) => {
+  //console.log(req.user.id);
+  const groups = await Group.find({ 'owner.id': req.user.id });
+  res.status(200).json({ success: true, data: groups });
+});
+
+exports.getMyJoinedGroups = asyncHandler(async (req, res, next) => {
+  //console.log(req.user.id);
+  const user = await User.findById(req.user.id);
+  successResponse(user.groups, res);
+  //res.status(200).json({ success: true, data: groups });
 });
 
 exports.generateLinkJoinGroup = asyncHandler(async (req, res, next) => {
@@ -113,7 +123,8 @@ exports.joinGroup = asyncHandler(async (req, res, next) => {
         runValidators: true,
       }
     );
-    res.status(200).json({ success: true, data: {} });
+    successResponse('Join success', res);
+    //res.status(200).json({ success: true, data: {} });
   }
   return next(new ErrorResponse('You was a member of this group', 500));
 });
@@ -138,7 +149,7 @@ exports.generateLinkEmail = asyncHandler(async (req, res, next) => {
       subject: 'Join group invitation',
       message,
     });
-    res.status(200).json({ success: true, data: {} });
+    successResponse(linkInvite, res);
   } else {
     return next(new ErrorResponse('Can not fin group to generate link', 500));
   }
@@ -158,7 +169,7 @@ exports.joinByMailLink = asyncHandler(async (req, res, next) => {
   }
   var findMember = group.member.find((obj) => obj.id == decoded.userid);
   if (!findMember) {
-    //update mamber of group
+    //update member of group
     var memberList = group.member;
     memberList.push({
       id: thisUser.id,
@@ -197,24 +208,52 @@ exports.joinByMailLink = asyncHandler(async (req, res, next) => {
 });
 
 exports.assignCoOwner = asyncHandler(async (req, res, next) => {
-  var user = await User.findOne({ username: req.body.username });
+  var user = await User.findOne({ username: req.body.coOwner });
   if (!user) {
     return next(new ErrorResponse('Could not find this user', 500));
   }
 
-  var group = await Group.findByIdAndUpdate(
-    req.body.groupId,
-    {
-      coOwner: { id: user.id, name: user.username },
-    },
-    {
-      new: true,
-      runValidators: true,
-    }
-  );
-  res.status(200).json({ success: true, data: {} });
-
-  if (!group) {
+  var myGroup = await Group.findById(req.body.groupId);
+  if (!myGroup) {
     return next(new ErrorResponse('Can not find this group with groupId', 500));
+  }
+
+  if (myGroup.owner.name == req.user.username) {
+    if (myGroup.coOwner.name != user.username) {
+      user.CoOwnGroups.push({
+        id: myGroup.id,
+        groupName: myGroup.groupName,
+      });
+      await user.save();
+      myGroup.coOwner.id = user.id;
+      myGroup.coOwner.name = user.username;
+      await myGroup.save();
+    }
+    successResponse('Assign success', res);
+  } else {
+    return next(new ErrorResponse('You do not own this group', 500));
+  }
+});
+
+exports.unAssignCoOwner = asyncHandler(async (req, res, next) => {
+  var user = await User.findOne({ username: req.body.coOwner });
+  if (!user) {
+    return next(new ErrorResponse('Could not find this user', 500));
+  }
+
+  var myGroup = await Group.findById(req.body.groupId);
+  if (!myGroup) {
+    return next(new ErrorResponse('Can not find this group with groupId', 500));
+  }
+  if (myGroup.owner.name == req.user.username) {
+    myGroup.coOwner = null;
+    user.CoOwnGroups = user.CoOwnGroups.find(
+      (obj) => obj.groupName != myGroup.groupName
+    );
+    await user.save();
+    await myGroup.save();
+    successResponse('Unassign success', res);
+  } else {
+    return next(new ErrorResponse('You do not own this group', 500));
   }
 });

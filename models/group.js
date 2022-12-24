@@ -7,6 +7,7 @@ const Group = new mongoose.Schema({
     required: [true, 'Please add a groupName'],
     trim: true,
     maxlength: [100, 'Groupname can not be more than 100 characters'],
+    unique: true,
   },
   owner: {
     type: {

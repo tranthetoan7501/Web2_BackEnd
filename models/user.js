@@ -32,6 +32,12 @@ const User = new mongoose.Schema({
       groupName: String,
     },
   ],
+  CoOwnGroups: [
+    {
+      id: String,
+      groupName: String,
+    },
+  ],
   groups: [
     {
       id: String,

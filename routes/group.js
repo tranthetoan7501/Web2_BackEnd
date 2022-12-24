@@ -12,6 +12,8 @@ const {
   joinByMailLink,
   assignCoOwner,
   getGroupById,
+  getMyJoinedGroups,
+  unAssignCoOwner,
 } = require('../controllers/group/groupController');
 
 router
@@ -22,6 +24,9 @@ router
 router
   .route('/mygroups')
   .get(passport.authenticate('jwt', { session: false }), getMyGroups);
+router
+  .route('/myjoinedgroups')
+  .get(passport.authenticate('jwt', { session: false }), getMyJoinedGroups);
 
 router
   .route('/invitelink')
@@ -39,7 +44,11 @@ router
 
 router
   .route('/assigncoowner')
-  .post(passport.authenticate('jwt', { session: false }), assignCoOwner);
+  .put(passport.authenticate('jwt', { session: false }), assignCoOwner);
+
+router
+  .route('/unassigncoowner')
+  .put(passport.authenticate('jwt', { session: false }), unAssignCoOwner);
 
 router
   .route('/:id')
