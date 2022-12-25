@@ -16,10 +16,12 @@ const Group = new mongoose.Schema({
     },
     required: [true, 'Please add owner'],
   },
-  coOwner: {
-    id: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
-    name: String,
-  },
+  coOwners: [
+    {
+      id: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
+      name: String,
+    },
+  ],
   member: [
     {
       id: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },

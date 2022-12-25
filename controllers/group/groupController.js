@@ -214,19 +214,20 @@ exports.assignCoOwner = asyncHandler(async (req, res, next) => {
   }
 
   if (myGroup.owner.name == req.user.username) {
-    if (myGroup.coOwner.name != user.username) {
+    const findOwner = myGroup.coOwners.find((obj) => obj.name == user.username);
+    if (!findOwner) {
       user.CoOwnGroups.push({
         id: myGroup.id,
         groupName: myGroup.groupName,
       });
       await user.save();
-      myGroup.coOwner.id = user.id;
-      myGroup.coOwner.name = user.username;
+      myGroup.coOwners.push({ id: user.id, name: user.username });
       await myGroup.save();
+      successResponse('Assign success', res);
+    } else {
+      return next(new ErrorResponse('You was Co-Owner', 500));
     }
-    successResponse('Assign success', res);
   } else {
-    return next(new ErrorResponse('You do not own this group', 500));
   }
 });
 
@@ -245,7 +246,9 @@ exports.unAssignCoOwner = asyncHandler(async (req, res, next) => {
       (obj) => obj.groupName != myGroup.groupName
     );
     await user.save();
-    myGroup.coOwner = null;
+    myGroup.coOwners = myGroup.coOwners.find(
+      (obj) => obj.name != user.username
+    );
     await myGroup.save();
     successResponse('Unassign success', res);
   } else {
@@ -263,13 +266,13 @@ exports.kickMember = asyncHandler(async (req, res, next) => {
   if (!myGroup) {
     return next(new ErrorResponse('Can not find this group with groupId', 500));
   }
-  if (
-    myGroup.owner.name == req.user.username ||
-    myGroup.coOwner.name == req.user.username
-  ) {
+  if (myGroup.owner.name == req.user.username) {
     user.groups = user.groups.find((obj) => obj.groupName != myGroup.groupName);
     await user.save();
     myGroup.member = myGroup.member.find((obj) => obj.name != user.username);
+    myGroup.coOwners = myGroup.coOwners.find(
+      (obj) => obj.name != user.username
+    );
     await myGroup.save();
     successResponse('Kick success', res);
   } else {
@@ -291,11 +294,13 @@ exports.deleteGroup = asyncHandler(async (req, res, next) => {
     await owner.save();
 
     //remove group in Coowner's grouplist
-    var coOwner = await User.findOne({ username: myGroup.coOwner.name });
-    coOwner.CoOwnGroups = coOwner.CoOwnGroups.find(
-      (obj) => obj.groupName != myGroup.groupName
-    );
-    await coOwner.save();
+    myGroup.coOwners.forEach(async (item) => {
+      var coOwner = await User.findById(item.id);
+      coOwner.CoOwnGroups = coOwner.CoOwnGroups.find(
+        (obj) => obj.groupName != myGroup.groupName
+      );
+      await coOwner.save();
+    });
 
     //remove group in each member's grouplist
     myGroup.member.forEach(async (item) => {
