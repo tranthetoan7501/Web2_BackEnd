@@ -2,13 +2,15 @@ const Presentation = require('../../models/presentation');
 const Game = require('../../models/game');
 const asyncHandler = require('../../middleware/async');
 const ErrorResponse = require('../../utils/errorResponse');
-
+const PreService = require('./presentService');
+const { successResponse } = require('../../utils/response');
+const User = require('../../models/user');
 exports.getPresentationById = asyncHandler(async (req, res, next) => {
   var item = await Presentation.findById(req.params.id).select(
     '-questions.trueAns'
   );
   if (item) {
-    res.status(200).json({ success: true, data: item });
+    successResponse(item, res);
   } else {
     return next(new ErrorResponse('Can not find presentation by id', 500));
   }
@@ -75,16 +77,11 @@ exports.createPresentation = asyncHandler(async (req, res, next) => {
 });
 
 exports.updatePresentation = asyncHandler(async (req, res, next) => {
-  var presentation = await Presentation.findByIdAndUpdate(
-    req.params.id,
-    { questions: req.body.questions },
-    {
-      new: true,
-      runValidators: true,
-    }
-  );
+  var presentation = await Presentation.findById(req.params.id);
+  presentation.questions = req.body.questions;
+  await presentation.save();
   if (presentation) {
-    res.status(200).json({ success: true, data: presentation });
+    successResponse(presentation, res);
   } else {
     return next(new ErrorResponse('Can not find presentation by id', 500));
   }
@@ -93,7 +90,67 @@ exports.updatePresentation = asyncHandler(async (req, res, next) => {
 exports.deletePresentation = asyncHandler(async (req, res, next) => {
   var presentation = await Presentation.findByIdAndDelete(req.params.id);
   if (presentation) {
-    res.status(200).json({ success: true, data: presentation });
+    successResponse(presentation, res);
   }
   return next(new ErrorResponse('Can not find presentation by id', 500));
+});
+
+exports.addCollaborator = asyncHandler(async (req, res, next) => {
+  var presentation = await Presentation.findById(req.body.presentid);
+  if (req.user.id != presentation.userCreate) {
+    return next(
+      new ErrorResponse('You are not creator of this presentation', 500)
+    );
+  }
+
+  var collaborator = await User.findOne({ username: req.body.collaborator });
+  if (!collaborator) {
+    return next(
+      new ErrorResponse('Can not find this collaborator account', 500)
+    );
+  }
+  if (presentation) {
+    var findCollaborator = presentation.collaborators.find(
+      (obj) => obj.id == collaborator.id
+    );
+    if (!findCollaborator) {
+      presentation.collaborators.push({
+        id: collaborator.id,
+        name: collaborator.username,
+      });
+      await presentation.save();
+      successResponse(presentation, res);
+    } else {
+      successResponse('Collaborator was added before', res);
+    }
+  } else {
+    return next(new ErrorResponse('Can not find presentation by id', 500));
+  }
+});
+
+exports.removeCollaborator = asyncHandler(async (req, res, next) => {
+  var presentation = await Presentation.findById(req.body.presentid);
+  if (req.user.id != presentation.userCreate) {
+    return next(
+      new ErrorResponse('You are not creator of this presentation', 500)
+    );
+  }
+  if (presentation) {
+    presentation.collaborators = presentation.collaborators.find(
+      (obj) => obj.name != req.body.collaborator
+    );
+    await presentation.save();
+    successResponse(presentation, res);
+  } else {
+    return next(new ErrorResponse('Can not find presentation by id', 500));
+  }
+});
+
+exports.getCollabPresentation = asyncHandler(async (req, res, next) => {
+  var presentation = await Presentation.find({
+    collaborators: { $elemMatch: { id: req.user.id } },
+  })
+    .select('-questions')
+    .select('-collaborators');
+  successResponse(presentation, res);
 });

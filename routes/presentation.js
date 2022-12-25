@@ -11,11 +11,18 @@ const {
   getMyPresentations,
   getMyPresentationById,
   getPresentationByPin,
+  addCollaborator,
+  removeCollaborator,
+  getCollabPresentation,
 } = require('../controllers/presentation/presentController');
 
 router
   .route('/myPresentation')
   .get(passport.authenticate('jwt', { session: false }), getMyPresentations);
+
+router
+  .route('/myCollabPresentation')
+  .get(passport.authenticate('jwt', { session: false }), getCollabPresentation);
 
 router
   .route('/myPresentation/:id')
@@ -31,6 +38,12 @@ router
     passport.authenticate('jwt', { session: false }),
     getPresentationByUserId
   );
+router
+  .route('/addcollaborator')
+  .put(passport.authenticate('jwt', { session: false }), addCollaborator);
+router
+  .route('/removecollaborator')
+  .put(passport.authenticate('jwt', { session: false }), removeCollaborator);
 
 router.route('/join/:name/:pin').put(getPresentationByPin);
 router

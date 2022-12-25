@@ -4,10 +4,16 @@ const Presentation = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     required: true,
   },
+  collaborators: [
+    {
+      id: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
+      name: String,
+    },
+  ],
   name: {
     type: String,
     required: [true, 'Name must have'],
-    unique: [true, 'Name is exist'],
+    unique: true,
   },
   questions: [
     {
