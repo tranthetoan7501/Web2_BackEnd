@@ -1,12 +1,12 @@
-const UserModel = require('../../models/user');
+const User = require('../../models/user');
 
 exports.findUserByGoogleID = async (googleID) => {
-  const user = await UserModel.findOne({ googleId: googleID });
+  const user = await User.findOne({ googleId: googleID });
   return user;
 };
 
 exports.findUserByEmail = async (email) => {
-  const user = await UserModel.findOne({ email: email });
+  const user = await User.findOne({ email: email });
   return user;
 };
 

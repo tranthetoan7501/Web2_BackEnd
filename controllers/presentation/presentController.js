@@ -17,11 +17,11 @@ exports.getPresentationById = asyncHandler(async (req, res, next) => {
 });
 
 // used when user join
-exports.getPresentationByPin = asyncHandler(async (req, res, next) => {
-  const game = await Game.findOne({ pin: req.params.pin });
+exports.getPresentationByroomId = asyncHandler(async (req, res, next) => {
+  const game = await Game.findOne({ roomId: req.params.roomId });
 
   if (!game) {
-    return next(new ErrorResponse('Can not find game with pin', 404));
+    return next(new ErrorResponse('Can not find game with roomId', 404));
   }
   if (game.isOpen) {
     var findMember = game.participants.find(

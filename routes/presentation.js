@@ -10,7 +10,7 @@ const {
   deletePresentation,
   getMyPresentations,
   getMyPresentationById,
-  getPresentationByPin,
+  getPresentationByroomId,
   addCollaborator,
   removeCollaborator,
   getCollabPresentation,
@@ -45,7 +45,7 @@ router
   .route('/removecollaborator')
   .put(passport.authenticate('jwt', { session: false }), removeCollaborator);
 
-router.route('/join/:name/:pin').put(getPresentationByPin);
+router.route('/join/:name/:roomId').put(getPresentationByroomId);
 router
   .route('/:id')
   .get(getPresentationById)

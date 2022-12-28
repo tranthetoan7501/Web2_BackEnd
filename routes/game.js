@@ -7,6 +7,7 @@ const {
   updateGameStatus,
   updateUserScore,
   getGameResult,
+  joinByroomId,
 } = require('../controllers/game/gameController');
 router
   .route('/creategame')
@@ -15,10 +16,8 @@ router
   .route('/updateStatus')
   .put(passport.authenticate('jwt', { session: false }), updateGameStatus);
 
-router.route('/gameresult/:pin').get(getGameResult);
-
-router
-  .route('/answer/:pin')
-  .put(passport.authenticate('jwt', { session: false }), updateUserScore);
+router.route('/gameresult/:roomId').get(getGameResult);
+router.route('/join/:name/:roomId').put(joinByroomId);
+router.route('/answer/:roomId').put(updateUserScore);
 
 module.exports = router;

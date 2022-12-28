@@ -9,20 +9,22 @@ const Game = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Presentation',
   },
-  pin: {
+  roomId: {
     type: String,
+    unique: true,
   },
-  participants: {
-    type: [
-      {
-        name: String,
-        score: {
-          type: Number,
-          default: 0,
-        },
+  participants: [
+    {
+      name: String,
+      score: {
+        type: Number,
+        default: 0,
       },
-    ],
-    unique: false,
+    },
+  ],
+  groupId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Group',
   },
   isOpen: {
     type: Boolean,
@@ -36,12 +38,10 @@ Game.pre('save', async function (next) {
     var characters =
       'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     var charactersLength = characters.length;
-    for (var i = 0; i < 6; i++) {
+    for (var i = 0; i < 8; i++) {
       result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
-    this.pin = result;
-    this.participants.push({ name: this.pin });
-    console.log('created new game with new pin: ', result);
+    this.roomId = result;
   }
 });
 

@@ -86,7 +86,7 @@ exports.joinGroup = asyncHandler(async (req, res, next) => {
     );
   }
   if (!findMember) {
-    //update mamber of group
+    //update member of group
     var memberList = group.member;
     memberList.push({
       id: req.user.id,
@@ -120,9 +120,9 @@ exports.joinGroup = asyncHandler(async (req, res, next) => {
       }
     );
     successResponse('Join success', res);
-    //res.status(200).json({ success: true, data: {} });
+  } else {
+    return next(new ErrorResponse('You was a member of this group', 500));
   }
-  return next(new ErrorResponse('You was a member of this group', 500));
 });
 
 exports.generateLinkEmail = asyncHandler(async (req, res, next) => {

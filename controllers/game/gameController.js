@@ -2,24 +2,24 @@ const Game = require('../../models/game');
 const Presentation = require('../../models/presentation');
 const asyncHandler = require('../../middleware/async');
 const ErrorResponse = require('../../utils/errorResponse');
+const { successResponse } = require('../../utils/response');
+const GameService = require('./gameService');
 
 exports.createGame = asyncHandler(async (req, res, next) => {
-  var game = new Game();
-  game.userCreateId = req.user.id;
-  game.presentationId = req.body.presentationId;
-
-  const createdGame = await Game.create(game);
-  const presentation = await Presentation.findById(createdGame.presentationId);
-  res.status(200).json({
-    success: true,
-    data: { pin: createdGame.pin, presentation: presentation },
-  });
+  //body : presentationId
+  const createdGame = await GameService.createGame(req);
+  const presentation = await Presentation.findById(
+    createdGame.presentationId
+  ).select('-collaborators');
+  successResponse(
+    { roomId: createdGame.roomId, presentation: presentation },
+    res
+  );
 });
 
 exports.updateGameStatus = asyncHandler(async (req, res, next) => {
-  console.log({ userCreateId: req.user.id, pin: req.body.pin });
   var game = await Game.findOneAndUpdate(
-    { userCreateId: req.user.id, pin: req.body.pin },
+    { userCreateId: req.user.id, roomId: req.body.roomId },
     {
       isOpen: req.body.isOpen,
     },
@@ -29,19 +29,41 @@ exports.updateGameStatus = asyncHandler(async (req, res, next) => {
     }
   );
   if (game) {
-    res.status(200).json({ success: true, data: game });
+    successResponse({ success: true, data: game }, res);
   } else {
     return next(new ErrorResponse('Can not find game', 500));
   }
 });
 
+exports.joinByroomId = asyncHandler(async (req, res, next) => {
+  const game = await Game.findOne({ roomId: req.params.roomId });
+  if (!game) {
+    return next(new ErrorResponse('Can not find game with roomId', 404));
+  }
+  if (game.isOpen) {
+    var findMember = game.participants.find(
+      (obj) => obj.name == req.params.name
+    );
+    if (findMember) {
+      return next(new ErrorResponse('Username is exist', 500));
+    }
+    game.participants.push({ name: req.params.name });
+    await game.save();
+    var item = await Presentation.findById(game.presentationId)
+      .select('-questions.trueAns')
+      .select('-collaborators');
+    successResponse({ success: true, data: item }, res);
+  } else {
+    return next(new ErrorResponse('Room is not active', 404));
+  }
+});
+
 exports.updateUserScore = asyncHandler(async (req, res, next) => {
-  //SocketIo.in(req.params.pin).emit('teacher-receiver', 'adadfafdfadfd');
-  const game = await Game.findOne({ pin: req.params.pin });
+  //SocketIo.in(req.params.roomId).emit('teacher-receiver', 'adadfafdfadfd');
+  const game = await Game.findOne({ roomId: req.params.roomId });
   if (!game) {
     return next(new ErrorResponse('Can not find game', 500));
   }
-
   //user score
   var findMember = game.participants.find(
     (obj) => obj.name == req.body.username
@@ -61,27 +83,26 @@ exports.updateUserScore = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse('Can not find presentation', 500));
   }
   var result = false;
-  if (presentation.questions[0].trueAns == req.body.ans) {
+  if (presentation.questions[req.body.question - 1].trueAns == req.body.ans) {
     findMember.score = findMember.score + 1;
     console.log(findMember.score);
     result = true;
   }
-
   //Update score
   game.participants.push(findMember);
   await game.save();
-  //SocketIo.in(req.params.pin).emit('teacher-receiver', req.body);
+  //SocketIo.in(req.params.roomId).emit('teacher-receiver', req.body);
   res.status(200).json({ success: true, data: result });
 });
 
 exports.getGameResult = asyncHandler(async (req, res, next) => {
-  const game = await Game.findOne({ pin: req.params.pin });
+  const game = await Game.findOne({ roomId: req.params.roomId });
   if (game) {
     game.participants = game.participants.filter(function (obj) {
-      return obj.name != req.params.pin;
+      return obj.name != req.params.roomId;
     });
     res.status(200).json({ success: true, data: game.participants });
   } else {
-    return next(new ErrorResponse('Can not find game by pin', 500));
+    return next(new ErrorResponse('Can not find game by roomId', 500));
   }
 });
