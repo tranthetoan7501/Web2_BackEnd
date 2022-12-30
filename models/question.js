@@ -15,21 +15,29 @@ const Question = new mongoose.Schema({
   answers: [
     {
       username: String,
-      content: String,
+      answer: String,
       createdAt: {
         type: Date,
         default: Date.now,
       },
     },
   ],
+  voters: [{ type: String }],
   totalVote: {
     type: Number,
-    default: 0,
+  },
+  isAnswer: {
+    type: Boolean,
+    default: false,
   },
   createdAt: {
     type: Date,
     default: Date.now,
   },
+});
+
+Question.pre('save', async function (next) {
+  this.totalVote = this.voters.length;
 });
 
 module.exports = mongoose.model('Question', Question);

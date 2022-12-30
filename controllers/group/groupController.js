@@ -257,7 +257,7 @@ exports.unAssignCoOwner = asyncHandler(async (req, res, next) => {
 });
 
 exports.kickMember = asyncHandler(async (req, res, next) => {
-  var user = await User.findOne({ username: req.body.kickUserId });
+  var user = await User.findOne({ username: req.body.kickUsername });
   if (!user) {
     return next(new ErrorResponse('Could not find this user', 500));
   }

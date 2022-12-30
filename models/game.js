@@ -22,6 +22,23 @@ const Game = new mongoose.Schema({
       },
     },
   ],
+  answers: [
+    {
+      name: String,
+      question: Number,
+      answer: String,
+      isTrue: Boolean,
+      time: {
+        type: String,
+        default:
+          new Date().getHours() +
+          ':' +
+          new Date().getMinutes() +
+          ':' +
+          new Date().getSeconds(),
+      },
+    },
+  ],
   groupId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Group',

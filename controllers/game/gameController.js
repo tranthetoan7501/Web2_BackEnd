@@ -1,4 +1,5 @@
 const Game = require('../../models/game');
+
 const Presentation = require('../../models/presentation');
 const asyncHandler = require('../../middleware/async');
 const ErrorResponse = require('../../utils/errorResponse');
@@ -19,7 +20,11 @@ exports.createGame = asyncHandler(async (req, res, next) => {
 
 exports.updateGameStatus = asyncHandler(async (req, res, next) => {
   var game = await Game.findOneAndUpdate(
-    { userCreateId: req.user.id, roomId: req.body.roomId },
+    {
+      userCreateId: req.user.id,
+      //userCreateId: '63a69aa445975433dddfde8e' /*req.user.id*/,
+      roomId: req.body.roomId,
+    },
     {
       isOpen: req.body.isOpen,
     },
@@ -52,14 +57,15 @@ exports.joinByroomId = asyncHandler(async (req, res, next) => {
     var item = await Presentation.findById(game.presentationId)
       .select('-questions.trueAns')
       .select('-collaborators');
-    successResponse({ success: true, data: item }, res);
+    const isHost = await GameService.isHost(game.groupId, req.params.name);
+
+    successResponse({ questions: item.questions, isHost: isHost }, res);
   } else {
     return next(new ErrorResponse('Room is not active', 404));
   }
 });
 
 exports.updateUserScore = asyncHandler(async (req, res, next) => {
-  //SocketIo.in(req.params.roomId).emit('teacher-receiver', 'adadfafdfadfd');
   const game = await Game.findOne({ roomId: req.params.roomId });
   if (!game) {
     return next(new ErrorResponse('Can not find game', 500));
@@ -72,27 +78,35 @@ exports.updateUserScore = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse('Can not find user in participants', 500));
   }
 
-  //remove old data
-  game.participants = game.participants.filter(function (obj) {
-    return obj.name != req.body.username;
-  });
-
   //presentation
   var presentation = await Presentation.findById(game.presentationId);
   if (!presentation) {
     return next(new ErrorResponse('Can not find presentation', 500));
   }
-  var result = false;
-  if (presentation.questions[req.body.question - 1].trueAns == req.body.ans) {
-    findMember.score = findMember.score + 1;
-    console.log(findMember.score);
-    result = true;
-  }
+  var isAnswer = game.answers.find(
+    (obj) => obj.name == req.body.username && obj.question == req.body.question
+  );
   //Update score
-  game.participants.push(findMember);
-  await game.save();
-  //SocketIo.in(req.params.roomId).emit('teacher-receiver', req.body);
-  res.status(200).json({ success: true, data: result });
+  if (!isAnswer) {
+    //update score
+    var result = false;
+    if (presentation.questions[req.body.question - 1].trueAns == req.body.ans) {
+      findMember.score = findMember.score + 1;
+      result = true;
+    }
+    //update answer
+    game.answers.push({
+      name: req.body.username,
+      question: req.body.question,
+      answer: req.body.ans,
+      isTrue: result,
+    });
+    await game.save();
+    successResponse(result, res);
+  } else {
+    return next(new ErrorResponse('you have answered!!!'), 500);
+    successResponse('you have answered!!!', res);
+  }
 });
 
 exports.getGameResult = asyncHandler(async (req, res, next) => {
@@ -101,7 +115,10 @@ exports.getGameResult = asyncHandler(async (req, res, next) => {
     game.participants = game.participants.filter(function (obj) {
       return obj.name != req.params.roomId;
     });
-    res.status(200).json({ success: true, data: game.participants });
+    res.status(200).json({
+      success: true,
+      data: { result: game.participants, history: game.answers },
+    });
   } else {
     return next(new ErrorResponse('Can not find game by roomId', 500));
   }

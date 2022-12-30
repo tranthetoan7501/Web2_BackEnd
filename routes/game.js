@@ -9,9 +9,11 @@ const {
   getGameResult,
   joinByroomId,
 } = require('../controllers/game/gameController');
-router
-  .route('/creategame')
-  .post(passport.authenticate('jwt', { session: false }), createGame);
+// router
+//   .route('/creategame')
+//   .post(passport.authenticate('jwt', { session: false }), createGame);
+
+router.route('/creategame').post(createGame);
 router
   .route('/updateStatus')
   .put(passport.authenticate('jwt', { session: false }), updateGameStatus);
