@@ -242,11 +242,11 @@ exports.unAssignCoOwner = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse('Can not find this group with groupId', 500));
   }
   if (myGroup.owner.name == req.user.username) {
-    user.CoOwnGroups = user.CoOwnGroups.find(
+    user.CoOwnGroups = user.CoOwnGroups.filter(
       (obj) => obj.groupName != myGroup.groupName
     );
     await user.save();
-    myGroup.coOwners = myGroup.coOwners.find(
+    myGroup.coOwners = myGroup.coOwners.filter(
       (obj) => obj.name != user.username
     );
     await myGroup.save();
@@ -267,10 +267,15 @@ exports.kickMember = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse('Can not find this group with groupId', 500));
   }
   if (myGroup.owner.name == req.user.username) {
-    user.groups = user.groups.find((obj) => obj.groupName != myGroup.groupName);
+    user.groups = user.groups.filter(
+      (obj) => obj.groupName != myGroup.groupName
+    );
+    user.CoOwnGroups = user.groups.filter(
+      (obj) => obj.groupName != myGroup.groupName
+    );
     await user.save();
-    myGroup.member = myGroup.member.find((obj) => obj.name != user.username);
-    myGroup.coOwners = myGroup.coOwners.find(
+    myGroup.member = myGroup.member.filter((obj) => obj.name != user.username);
+    myGroup.coOwners = myGroup.coOwners.filter(
       (obj) => obj.name != user.username
     );
     await myGroup.save();
@@ -288,7 +293,7 @@ exports.deleteGroup = asyncHandler(async (req, res, next) => {
   if (myGroup.owner.name == req.user.username) {
     //remove group in owner's grouplist
     var owner = await User.findOne({ username: myGroup.owner.name });
-    owner.ownGroups = owner.ownGroups.find(
+    owner.ownGroups = owner.ownGroups.filter(
       (obj) => obj.groupName != myGroup.groupName
     );
     await owner.save();
@@ -305,7 +310,7 @@ exports.deleteGroup = asyncHandler(async (req, res, next) => {
     //remove group in each member's grouplist
     myGroup.member.forEach(async (item) => {
       var user = await User.findById(item.id);
-      user.groups = user.groups.find(
+      user.groups = user.groups.filter(
         (obj) => obj.groupName != myGroup.groupName
       );
       await user.save();
