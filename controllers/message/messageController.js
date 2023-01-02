@@ -7,7 +7,6 @@ const MesService = require('./messageService');
 
 exports.createMessage = asyncHandler(async (req, res, next) => {
   //body: roomId, username, content
-  console.log(req.body);
   const mess = await MesService.createMessage(req);
   successResponse(mess, res);
 });

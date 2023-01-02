@@ -26,7 +26,7 @@ const Question = new mongoose.Schema({
   totalVote: {
     type: Number,
   },
-  isAnswer: {
+  isAnswered: {
     type: Boolean,
     default: false,
   },

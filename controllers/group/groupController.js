@@ -39,7 +39,17 @@ exports.getGroupById = asyncHandler(async (req, res, next) => {
   if (!group) {
     return next(new ErrorResponse('Can not find group with id', 500));
   }
-  successResponse(group, res);
+  var findMem = group.member.find((obj) => obj.id == req.user.id);
+  var findCo = group.coOwners.find((obj) => obj.id == req.user.id);
+  if (group.owner.id == req.user.id) {
+    res.status(200).json({ success: true, data: group, role: 'OWNER' });
+  } else if (findCo) {
+    res.status(200).json({ success: true, data: group, role: 'COOWNER' });
+  } else if (findMem) {
+    res.status(200).json({ success: true, data: group, role: 'MEMBER' });
+  } else {
+    res.status(200).json({ success: true, data: group });
+  }
 });
 
 exports.getGroups = asyncHandler(async (req, res, next) => {

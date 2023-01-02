@@ -18,11 +18,17 @@ exports.createGame = asyncHandler(async (req, res, next) => {
   );
 });
 
+exports.getGameInGroup = asyncHandler(async (req, res, next) => {
+  //body : groupId
+  const game = await Game.find({ groupId: req.params.groupId });
+  successResponse(game, res);
+});
+
 exports.updateGameStatus = asyncHandler(async (req, res, next) => {
   var game = await Game.findOneAndUpdate(
     {
       userCreateId: req.user.id,
-      //userCreateId: '63a69aa445975433dddfde8e' /*req.user.id*/,
+      //userCreateId: '63a69a9a45975433dddfde8c' /*req.user.id*/,
       roomId: req.body.roomId,
     },
     {
