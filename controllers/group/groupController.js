@@ -332,3 +332,11 @@ exports.deleteGroup = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse('You do not have right', 500));
   }
 });
+
+exports.getGroupToCreateGame = asyncHandler(async (req, res, next) => {
+  const users = await User.findById(req.user.id);
+  successResponse(
+    { ownGroups: users.ownGroups, CoOwnGroups: users.CoOwnGroups },
+    res
+  );
+});

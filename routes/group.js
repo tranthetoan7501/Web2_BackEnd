@@ -16,12 +16,17 @@ const {
   unAssignCoOwner,
   kickMember,
   deleteGroup,
+  getGroupToCreateGame,
 } = require('../controllers/group/groupController');
 
 router
   .route('/')
   .get(passport.authenticate('jwt', { session: false }), getGroups)
   .post(passport.authenticate('jwt', { session: false }), createGroup);
+
+router
+  .route('/getGroupForGame')
+  .get(passport.authenticate('jwt', { session: false }), getGroupToCreateGame);
 
 router
   .route('/mygroups')

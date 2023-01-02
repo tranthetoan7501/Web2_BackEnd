@@ -44,3 +44,11 @@ exports.getUserGoogleAccount = asyncHandler(async (req, res, next) => {
     successResponse('logout success', res);
   }
 });
+
+exports.getGroupToCreateGame = asyncHandler(async (req, res, next) => {
+  const users = await User.findById(req.user.id);
+  successResponse(
+    { ownGroups: users.ownGroups, CoOwnGroups: users.CoOwnGroups },
+    res
+  );
+});

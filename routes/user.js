@@ -8,12 +8,16 @@ const {
   getUserById,
   getProfile,
   getUserGoogleAccount,
+  getGroupToCreateGame,
 } = require('../controllers/user/userController');
 const { logIn } = require('../controllers/auth/authController');
 
 router
   .route('/users')
   .get(passport.authenticate('jwt', { session: false }), getUsers);
+// router
+//   .route('/getGroupForGame')
+//   .get(passport.authenticate('jwt', { session: false }), getGroupToCreateGame);
 router
   .route('/profile')
   .get(passport.authenticate('jwt', { session: false }), getProfile);
