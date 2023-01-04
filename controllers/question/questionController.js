@@ -49,7 +49,7 @@ exports.markQuestion = asyncHandler(async (req, res, next) => {
   if (ques) {
     ques.isAnswered = !ques.isAnswered;
     await ques.save();
-    if (ques.isAnswer) {
+    if (ques.isAnswered) {
       successResponse('mark success', res);
     } else {
       successResponse('unmark success', res);
