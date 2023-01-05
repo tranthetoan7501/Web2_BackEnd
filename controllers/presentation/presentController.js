@@ -64,8 +64,8 @@ exports.getMyPresentations = asyncHandler(async (req, res, next) => {
 exports.getMyPresentationById = asyncHandler(async (req, res, next) => {
   var item = await Presentation.findOne({
     _id: req.params.id,
-    userCreate: req.user.id,
   });
+
   res.status(200).json({ success: true, data: item });
 });
 
